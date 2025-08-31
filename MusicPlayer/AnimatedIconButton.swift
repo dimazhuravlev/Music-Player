@@ -1,0 +1,61 @@
+import SwiftUI
+
+struct AnimatedIconButton: View {
+    let icon1: String
+    let icon2: String
+    let isActive: Bool
+    let iconSize: CGFloat
+    let onTap: () -> Void
+    
+    @State private var iconOpacity: Double = 1.0
+    @State private var iconScale: Double = 1.0
+    
+    // Convenience initializer with default size
+    init(icon1: String, icon2: String, isActive: Bool, iconSize: CGFloat = 24, onTap: @escaping () -> Void) {
+        self.icon1 = icon1
+        self.icon2 = icon2
+        self.isActive = isActive
+        self.iconSize = iconSize
+        self.onTap = onTap
+    }
+    
+    var body: some View {
+        ZStack {
+            // First icon (shows when isActive is false)
+            Image(icon1)
+                .resizable()
+                .renderingMode(.template)
+                .foregroundStyle(.white)
+                .frame(width: iconSize, height: iconSize)
+                .opacity(isActive ? 0 : iconOpacity)
+                .scaleEffect(isActive ? 0.4 : iconScale)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.5), value: isActive)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.5), value: iconScale)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.5), value: iconOpacity)
+            
+            // Second icon (shows when isActive is true)
+            Image(icon2)
+                .resizable()
+                .renderingMode(.template)
+                .foregroundStyle(.white)
+                .frame(width: iconSize, height: iconSize)
+                .opacity(isActive ? iconOpacity : 0)
+                .scaleEffect(isActive ? iconScale : 0.4)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.5), value: isActive)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.5), value: iconScale)
+                .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.5), value: iconOpacity)
+        }
+        .onTapGesture {
+            // Step 1: Fade out and scale down current icon
+            iconOpacity = 0
+            iconScale = 0.4
+            
+            // Step 2: Toggle state and animate new icon in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                onTap()
+                iconOpacity = 1.0
+                iconScale = 1.0
+            }
+        }
+    }
+}
