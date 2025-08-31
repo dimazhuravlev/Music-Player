@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FullscreenPlayer: View {
+struct Player: View {
     @State private var isPlaying = false
     @State private var isPreviousActive = false
     @State private var isNextActive = false
@@ -158,5 +158,5 @@ struct FullscreenPlayer: View {
 }
 
 #Preview {
-    FullscreenPlayer()
+    Player()
 }
