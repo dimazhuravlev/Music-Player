@@ -7,16 +7,16 @@ class FontManager {
     private init() {}
     
     func registerFonts() {
-        // Register YSMarket-VF.ttf
-        if let fontURL = Bundle.main.url(forResource: "YSMarket-VF", withExtension: "ttf") {
+        // Register YangoGroupHeadline-Bold.otf
+        if let fontURL = Bundle.main.url(forResource: "YangoGroupHeadline-Bold", withExtension: "otf") {
             var error: Unmanaged<CFError>?
             if CTFontManagerRegisterFontsForURL(fontURL as CFURL, .process, &error) {
-                print("✅ YSMarket-VF font registered successfully")
+                print("✅ YangoGroupHeadline-Bold font registered successfully")
             } else {
-                print("❌ Failed to register YSMarket-VF font: \(error?.takeRetainedValue() ?? "Unknown error" as! CFError)")
+                print("❌ Failed to register YangoGroupHeadline-Bold font: \(error?.takeRetainedValue() ?? "Unknown error" as! CFError)")
             }
         } else {
-            print("❌ YSMarket-VF.ttf not found in bundle")
+            print("❌ YangoGroupHeadline-Bold.otf not found in bundle")
         }
     }
 }
