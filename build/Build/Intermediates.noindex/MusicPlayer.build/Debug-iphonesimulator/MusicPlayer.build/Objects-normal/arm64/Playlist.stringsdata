@@ -1,0 +1,64 @@
+{
+  "source": "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Screens/Playlist.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Share Playlist",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 24
+        }
+      },
+      {
+        "comment": "",
+        "key": "Copy Link",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 25
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share via Message",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 26
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 27
+        }
+      },
+      {
+        "comment": "",
+        "key": "Choose how you'd like to share this playlist",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "Listen",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 161
+        }
+      },
+      {
+        "comment": "",
+        "key": "Top Tracks",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 283
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -9,12 +9,45 @@ struct Player: View {
     @State private var showHeartExplosion = false
     @State private var albumTapScale: CGFloat = 1.0
     @State private var albumLongTapScale: CGFloat = 1.0
-
+    @State private var dragOffset: CGFloat = 0
+    @State private var isDragging = false
+    
+    var dismiss: (() -> Void)?
+    
     var body: some View {
         ZStack {
             backgroundView
             mainContent
         }
+        .offset(y: dragOffset)
+        .gesture(
+            DragGesture()
+                .onChanged { value in
+                    if value.translation.height > 0 {
+                        dragOffset = value.translation.height
+                        isDragging = true
+                    }
+                }
+                .onEnded { value in
+                    let threshold: CGFloat = 200
+                    if value.translation.height > threshold || value.velocity.height > 500 {
+                        // Dismiss the player
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            dragOffset = 1000 // Large offset to dismiss
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                            dismiss?()
+                        }
+                    } else {
+                        // Snap back to original position
+                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                            dragOffset = 0
+                        }
+                    }
+                    isDragging = false
+                }
+        )
+        .animation(.spring(response: 0.6, dampingFraction: 0.8), value: dragOffset)
     }
     
     private var backgroundView: some View {
@@ -24,10 +57,17 @@ struct Player: View {
             .ignoresSafeArea()
             .blur(radius: 80)
             .overlay(Color.black.opacity(0.3).ignoresSafeArea())
+            .opacity(1.0 - (dragOffset / 1000) * 0.5)
     }
     
     private var mainContent: some View {
         VStack(spacing: 48) {
+            // Drag indicator
+            RoundedRectangle(cornerRadius: 2.5)
+                .fill(Color.white.opacity(0.6))
+                .frame(width: 36, height: 5)
+                .padding(.top, 8)
+            
             Spacer()
             albumCover
             controlButtons
@@ -148,7 +188,7 @@ struct Player: View {
                 .overlay(
                     Group {
                         if showHeartExplosion {
-                            HeartExplosionView(centerPosition: CGPoint(x: geometry.size.width * 0.68, y: geometry.size.height * 0.75))
+                            HeartExplosionView(centerPosition: CGPoint(x: geometry.size.width * 0.68, y: geometry.size.height * 0.78))
                                 .zIndex(1)
                         }
                     }

@@ -1,0 +1,108 @@
+{
+  "" : {
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicPlayer-master.dia",
+    "emit-module-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicPlayer-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicPlayer-master-emit-module.dia",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicPlayer-master.swiftdeps"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Features/AnimatedIconButton.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/AnimatedIconButton~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Features/BottomPlayerBar.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/BottomPlayerBar~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Features/HeartExplosionView.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/HeartExplosionView~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Features/PlayPauseButton.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlayPauseButton~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Features/PlaylistCarousel.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/PlaylistCarousel~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/MusicApp.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/MusicApp~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Screens/Player.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Player~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Screens/Playlist.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Playlist~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Screens/Showcase.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/Showcase~partial.swiftmodule"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/MusicPlayer.build/Debug-iphonesimulator/MusicPlayer.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}
