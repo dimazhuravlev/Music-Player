@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct Showcase: View {
+struct ForYouShowcase: View {
     @State private var selectedPlaylist: String?
     @State private var navigateToPlayer = false
     
@@ -14,7 +14,7 @@ struct Showcase: View {
             ScrollView {
                 VStack(spacing: 32) {
                     PlaylistCarousel(
-                        title: "Ramadan Mubarak",
+                        title: "",
                         playlists: [
                             PlaylistCard(imageName: "Anasheed", onTap: {}),
                             PlaylistCard(imageName: "EveningAzkar", onTap: {}),
@@ -28,7 +28,7 @@ struct Showcase: View {
                     )
                     
                     PlaylistCarousel(
-                        title: "Faith Journey",
+                        title: "Best Releases for You",
                         playlists: [
                             PlaylistCard(imageName: "Ruqya", onTap: {}),
                             PlaylistCard(imageName: "MorningAzkar", onTap: {}),
@@ -42,7 +42,7 @@ struct Showcase: View {
                     )
                     
                     PlaylistCarousel(
-                        title: "The Holy Quran",
+                        title: "Artists You Like",
                         playlists: [
                             PlaylistCard(imageName: "EveningAzkar", onTap: {}),
                             PlaylistCard(imageName: "Anasheed", onTap: {}),
@@ -83,7 +83,7 @@ struct Showcase: View {
                         }
                     )
                 }
-                .padding(.top, 8)
+                .padding(.top, 48)
                 .padding(.bottom, 120)
             }
         }
@@ -94,5 +94,5 @@ struct Showcase: View {
 }
 
 #Preview {
-    Showcase()
+    ForYouShowcase()
 }

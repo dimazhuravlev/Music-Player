@@ -1,4 +1,5 @@
 import SwiftUI
+import VariableBlur
 
 struct BottomBar: View {
     @State private var isPlaying = false
@@ -67,26 +68,44 @@ struct BottomBar: View {
             .padding(.leading, 16)
             .padding(.trailing, 32)
             .padding(.bottom, 24)
-            .background(
-                Rectangle()
-                    .frame(height: 260)
-                    .mask(
-                        LinearGradient(
-                            gradient: Gradient(stops: [
-                                .init(color: .clear, location: 0.0),
-                                .init(color: .black.opacity(0.25), location: 0.2),
-                                .init(color: .black.opacity(0.55), location: 0.3),
-                                .init(color: .black.opacity(0.85), location: 0.7),
-                                .init(color: .black, location: 1.0)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
-                    .allowsHitTesting(false)
-            )
         }
-        .fullScreenCover(isPresented: $showPlayer) {
+        .background (alignment: .bottom) {
+            ZStack {
+                VariableBlurView(maxBlurRadius: 8, direction: .blurredBottomClearTop)
+                    .frame(height: 100)
+                    .ignoresSafeArea()
+                
+                // Dark gradient overlay for better contrast
+                LinearGradient(
+                    gradient: Gradient(stops: [
+                        Gradient.Stop(color: .black.opacity(0.9), location: 0.00),
+                        Gradient.Stop(color: .black.opacity(0.85), location: 0.11),
+                        Gradient.Stop(color: .black.opacity(0.81), location: 0.20),
+                        Gradient.Stop(color: .black.opacity(0.75), location: 0.27),
+                        Gradient.Stop(color: .black.opacity(0.7), location: 0.34),
+                        Gradient.Stop(color: .black.opacity(0.65), location: 0.39),
+                        Gradient.Stop(color: .black.opacity(0.59), location: 0.44),
+                        Gradient.Stop(color: .black.opacity(0.53), location: 0.48),
+                        Gradient.Stop(color: .black.opacity(0.47), location: 0.53),
+                        Gradient.Stop(color: .black.opacity(0.41), location: 0.57),
+                        Gradient.Stop(color: .black.opacity(0.35), location: 0.61),
+                        Gradient.Stop(color: .black.opacity(0.28), location: 0.67),
+                        Gradient.Stop(color: .black.opacity(0.21), location: 0.73),
+                        Gradient.Stop(color: .black.opacity(0.14), location: 0.81),
+                        Gradient.Stop(color: .black.opacity(0.07), location: 0.89),
+                        Gradient.Stop(color: .black.opacity(0), location: 1.00),
+                        ],),
+                    startPoint: .bottom,
+                    endPoint: .top
+                )
+                .frame(height: 100)
+                .ignoresSafeArea()
+            }
+        }
+        .ignoresSafeArea()
+
+    
+        .sheet(isPresented: $showPlayer) {
             Player(dismiss: {
                 showPlayer = false
             })

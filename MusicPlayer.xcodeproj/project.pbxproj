@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		FDDEA6582E6DDC35006813A4 /* VariableBlur in Frameworks */ = {isa = PBXBuildFile; productRef = FDDEA6572E6DDC35006813A4 /* VariableBlur */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		FD67D4F52E550611002CE397 /* MusicPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MusicPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDDEA6582E6DDC35006813A4 /* VariableBlur in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = MusicPlayer;
 			packageProductDependencies = (
+				FDDEA6572E6DDC35006813A4 /* VariableBlur */,
 			);
 			productName = MusicPlayer;
 			productReference = FD67D4F52E550611002CE397 /* MusicPlayer.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = FD67D4EC2E550611002CE397;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				FDDEA6562E6DDC35006813A4 /* XCRemoteSwiftPackageReference "VariableBlur" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = FD67D4F62E550611002CE397 /* Products */;
 			projectDirPath = "";
@@ -341,6 +350,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		FDDEA6562E6DDC35006813A4 /* XCRemoteSwiftPackageReference "VariableBlur" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nikstar/VariableBlur";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FDDEA6572E6DDC35006813A4 /* VariableBlur */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FDDEA6562E6DDC35006813A4 /* XCRemoteSwiftPackageReference "VariableBlur" */;
+			productName = VariableBlur;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = FD67D4ED2E550611002CE397 /* Project object */;
 }
