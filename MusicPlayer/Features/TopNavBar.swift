@@ -13,8 +13,8 @@ struct TopNavBar: View {
             HStack(spacing: 10) {
                 ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
                     Text(tab)
-                        .font(.custom("YangoGroupHeadline-Bold", size: 32))
-                        .foregroundColor(selectedTab == index ? .white : .white.opacity(0.35))
+                        .font(.Headline3)
+                        .foregroundColor(selectedTab == index ? .fill1 : .white.opacity(0.35))
                         .shadow(color: selectedTab == index ? .clear : .black.opacity(0.5), radius: 2, x: 0, y: 0)
                         .shadow(color: selectedTab == index ? .clear : .black.opacity(0.2), radius: 4, x: 0, y: 2)
                         .animation(.smooth(duration: 0.4), value: selectedTab)
@@ -46,7 +46,7 @@ struct TopNavBar: View {
                     let pinX = CGFloat(selectedTab) * (tabWidth + 5) + tabWidth / 2
                     
                     Circle()
-                        .fill(Color.white)
+                        .fill(Color.fill1)
                         .frame(width: 8, height: 8)
                         .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 0)
                         .position(x: pinX, y: 48)
@@ -77,7 +77,7 @@ struct TopNavBar: View {
         .padding(.bottom, 8)
         .background {
             ZStack {
-                VariableBlurView(maxBlurRadius: 8, direction: .blurredTopClearBottom)
+                VariableBlurView(maxBlurRadius: 16, direction: .blurredTopClearBottom)
                     .frame(height: 105)
                     .ignoresSafeArea()
                 

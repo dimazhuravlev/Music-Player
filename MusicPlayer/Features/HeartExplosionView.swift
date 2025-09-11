@@ -36,7 +36,7 @@ struct HeartExplosionView: View {
                 Image("like-active")
                     .resizable()
                     .renderingMode(.template)
-                    .foregroundStyle(.white)
+                    .foregroundColor(.fill1)
                     .frame(width: heart.size, height: heart.size)
                     .opacity(heart.opacity)
                     .rotationEffect(.degrees(heart.rotation))

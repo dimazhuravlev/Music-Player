@@ -25,7 +25,7 @@ struct BottomBar: View {
                         .cornerRadius(6)
                         .overlay(
                             RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.white, lineWidth: 2)
+                                .stroke(Color.fill1, lineWidth: 2)
                         )
                         .rotationEffect(.degrees(isCardsPressed ? -14 : -10))
                         .offset(x: isCardsPressed ? -14 : -10, y: isCardsPressed ? 4 : 4)
@@ -38,7 +38,7 @@ struct BottomBar: View {
                         .cornerRadius(6)
                         .overlay(
                             RoundedRectangle(cornerRadius: 4)
-                                .stroke(Color.white, lineWidth: 2)
+                                .stroke(Color.fill1, lineWidth: 2)
                         )
                         .rotationEffect(.degrees(isCardsPressed ? 14 : 10))
                         .offset(x: isCardsPressed ? 16 : 12, y: isCardsPressed ? -2 : -2)
@@ -71,7 +71,7 @@ struct BottomBar: View {
         }
         .background (alignment: .bottom) {
             ZStack {
-                VariableBlurView(maxBlurRadius: 8, direction: .blurredBottomClearTop)
+                VariableBlurView(maxBlurRadius: 16, direction: .blurredBottomClearTop)
                     .frame(height: 100)
                     .ignoresSafeArea()
                 

@@ -16,7 +16,18 @@ struct Playlist: View {
         ZStack {
             backgroundView
             contentView
-            backButtonOverlay
+            
+            // Fixed top navbar that stays in place during navigation
+            VStack {
+                NavBar(
+                    showBackButton: true,
+                    showSearchButton: true,
+                    onSearchTap: {},
+                    contentName: playlistName,
+                    contentImageName: playlistImageName
+                )
+                Spacer()
+            }
         }
         #if os(iOS)
         .navigationBarHidden(true)
@@ -52,17 +63,6 @@ struct Playlist: View {
         .ignoresSafeArea(.container, edges: .top)
     }
     
-    private var backButtonOverlay: some View {
-        VStack {
-            HStack {
-                BackButton()
-                    .padding(.top, 8)
-                    .padding(.leading, 20)
-                Spacer()
-            }
-            Spacer()
-        }
-    }
     
     private var sampleTracks: [Track] {
         [
@@ -132,8 +132,8 @@ struct ArtistHeader: View {
     private var artistInfo: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(playlistName ?? "Playlist")
-                .font(.Title1)
-                .foregroundColor(.white)
+                .font(.Headline1)
+                .foregroundColor(.fill1)
             
             HStack(spacing: 12) {
                 ListenButton(isPlaying: $isPlaying)
@@ -160,10 +160,10 @@ struct ListenButton: View {
                 Text("Listen")
                     .font(.system(size: 16, weight: .semibold))
             }
-            .foregroundColor(.white)
+            .foregroundColor(.fill1)
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
-            .background(Color.purple)
+            .background(Color.accent)
             .cornerRadius(25)
         }
     }
@@ -176,7 +176,7 @@ struct LikeButton: View {
         Button(action: { isLiked.toggle() }) {
             Image(systemName: isLiked ? "heart.fill" : "heart")
                 .font(.system(size: 20))
-                .foregroundColor(isLiked ? .red : .white)
+                .foregroundColor(isLiked ? .red : .fill1)
                 .frame(width: 44, height: 44)
                 .background(Color.white.opacity(0.1))
                 .clipShape(Circle())
@@ -191,7 +191,7 @@ struct ShareButton: View {
         Button(action: onTap) {
             Image(systemName: "square.and.arrow.up")
                 .font(.system(size: 20))
-                .foregroundColor(.white)
+                .foregroundColor(.fill1)
                 .frame(width: 44, height: 44)
                 .background(Color.white.opacity(0.1))
                 .clipShape(Circle())
@@ -241,12 +241,12 @@ struct FilterButton: View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 15, weight: .medium))
-                .foregroundColor(isSelected ? .black : .white)
+                .foregroundColor(isSelected ? .black : .fill1)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(
                     Capsule()
-                        .fill(isSelected ? Color.white : Color.white.opacity(0.15))
+                        .fill(isSelected ? Color.fill1 : Color.white.opacity(0.15))
                 )
                 .background(
                     Capsule()
@@ -258,20 +258,6 @@ struct FilterButton: View {
     }
 }
 
-struct BackButton: View {
-    @Environment(\.dismiss) private var dismiss
-    
-    var body: some View {
-        Button(action: { dismiss() }) {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 20, weight: .semibold))
-                .foregroundColor(.white)
-                .frame(width: 40, height: 40)
-                .background(Color.black.opacity(0.3))
-                .clipShape(Circle())
-        }
-    }
-}
 
 struct TrackList: View {
     let tracks: [Track]
@@ -281,7 +267,7 @@ struct TrackList: View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Top Tracks")
                 .font(.Text3)
-                .foregroundColor(.white)
+                .foregroundColor(.fill1)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 24)
             
@@ -310,7 +296,7 @@ struct TrackRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(track.title)
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(.fill1)
                 
                 Text(track.artist)
                     .font(.system(size: 14))

@@ -8,8 +8,8 @@ struct PlaylistCarousel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(title)
-                .font(.Text3)
-                .foregroundColor(.white)
+                .font(.Headline5)
+                .foregroundColor(.fill1)
                 .padding(.horizontal, 16)
             
             ScrollView(.horizontal, showsIndicators: false) {
@@ -39,7 +39,10 @@ struct PlaylistCard: View {
             .frame(width: 168, height: 168)
             .clipped()
             .cornerRadius(12)
-            .border(Color.white.opacity(0.08), width: 0.66)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
+            )
             .scaleEffect(cardTapScale * cardLongTapScale)
             .animation(.smooth(duration: 0.1), value: cardTapScale)
             .animation(.smooth(duration: 0.2), value: cardLongTapScale)
