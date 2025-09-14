@@ -5,7 +5,7 @@ struct Album: View {
     
     @State private var isPlaying = false
     @State private var isLiked = false
-    @State private var showShareAlert = false
+    @State private var scrollOffset: CGFloat = 0
     
     init(albumName: String? = nil) {
         self.albumName = albumName
@@ -23,7 +23,8 @@ struct Album: View {
                     showSearchButton: true,
                     onSearchTap: {},
                     contentName: albumName,
-                    contentImageName: albumImageName
+                    contentImageName: albumImageName,
+                    scrollOffset: scrollOffset
                 )
                 Spacer()
             }
@@ -31,13 +32,6 @@ struct Album: View {
         #if os(iOS)
         .navigationBarHidden(true)
         #endif
-        .alert("Share Album", isPresented: $showShareAlert) {
-            Button("Copy Link") { }
-            Button("Share via Message") { }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Choose how you'd like to share this album")
-        }
     }
     
     private var backgroundView: some View {
@@ -47,28 +41,49 @@ struct Album: View {
     private var contentView: some View {
         ScrollView {
             VStack(spacing: 0) {
+                // Invisible tracking view at the top
+                Color.clear
+                    .frame(height: 1)
+                    .trackScrollOffset(in: "scroll", offset: $scrollOffset)
+                
                 AlbumHeader(
                     albumName: albumName,
                     albumImageName: albumImageName,
                     isPlaying: $isPlaying,
-                    isLiked: $isLiked,
-                    onShare: { showShareAlert = true }
+                    isLiked: $isLiked
                 )
+                
                 AlbumTrackList(tracks: sampleTracks, albumImageName: albumImageName)
                 Spacer(minLength: 120)
             }
         }
+        .coordinateSpace(name: "scroll")
         .ignoresSafeArea(.container, edges: .top)
     }
     
     
     private var sampleTracks: [Track] {
         [
-            Track(id: 1, title: "Beautiful Things", artist: "Benson Boone"),
-            Track(id: 2, title: "Love Letters", artist: "Saint Levant"),
-            Track(id: 3, title: "Song 2", artist: "Blur"),
-            Track(id: 4, title: "Friday I'm in Love", artist: "The Cure"),
-            Track(id: 5, title: "Equinox", artist: "Aquarium")
+            Track(id: 1, title: "Beautiful Things", artist: "Benson Boone", albumCover: albumImageName),
+            Track(id: 2, title: "Love Letters", artist: "Saint Levant", albumCover: albumImageName),
+            Track(id: 3, title: "Song 2", artist: "Blur", albumCover: albumImageName),
+            Track(id: 4, title: "Friday I'm in Love", artist: "The Cure", albumCover: albumImageName),
+            Track(id: 5, title: "Equinox", artist: "Aquarium", albumCover: albumImageName),
+            Track(id: 6, title: "Bohemian Rhapsody", artist: "Queen", albumCover: albumImageName),
+            Track(id: 7, title: "Hotel California", artist: "Eagles", albumCover: albumImageName),
+            Track(id: 8, title: "Imagine", artist: "John Lennon", albumCover: albumImageName),
+            Track(id: 9, title: "Billie Jean", artist: "Michael Jackson", albumCover: albumImageName),
+            Track(id: 10, title: "Sweet Child O' Mine", artist: "Guns N' Roses", albumCover: albumImageName),
+            Track(id: 11, title: "Stairway to Heaven", artist: "Led Zeppelin", albumCover: albumImageName),
+            Track(id: 12, title: "Smells Like Teen Spirit", artist: "Nirvana", albumCover: albumImageName),
+            Track(id: 13, title: "Like a Rolling Stone", artist: "Bob Dylan", albumCover: albumImageName),
+            Track(id: 14, title: "What's Going On", artist: "Marvin Gaye", albumCover: albumImageName),
+            Track(id: 15, title: "Good Vibrations", artist: "The Beach Boys", albumCover: albumImageName),
+            Track(id: 16, title: "Johnny B. Goode", artist: "Chuck Berry", albumCover: albumImageName),
+            Track(id: 17, title: "Hey Jude", artist: "The Beatles", albumCover: albumImageName),
+            Track(id: 18, title: "Purple Rain", artist: "Prince", albumCover: albumImageName),
+            Track(id: 19, title: "Born to Run", artist: "Bruce Springsteen", albumCover: albumImageName),
+            Track(id: 20, title: "Respect", artist: "Aretha Franklin", albumCover: albumImageName)
         ]
     }
     
@@ -86,6 +101,36 @@ struct Album: View {
             return "cure"
         case "Equinox":
             return "aquarium"
+        case "Bohemian Rhapsody":
+            return "queen"
+        case "Hotel California":
+            return "eagles"
+        case "Imagine":
+            return "john lennon"
+        case "Billie Jean":
+            return "michael jackson"
+        case "Sweet Child O' Mine":
+            return "guns n roses"
+        case "Stairway to Heaven":
+            return "led zeppelin"
+        case "Smells Like Teen Spirit":
+            return "nirvana"
+        case "Like a Rolling Stone":
+            return "bob dylan"
+        case "What's Going On":
+            return "marvin gaye"
+        case "Good Vibrations":
+            return "beach boys"
+        case "Johnny B. Goode":
+            return "chuck berry"
+        case "Hey Jude":
+            return "beatles"
+        case "Purple Rain":
+            return "prince"
+        case "Born to Run":
+            return "bruce springsteen"
+        case "Respect":
+            return "aretha franklin"
         default:
             return "album"
         }
@@ -99,7 +144,6 @@ struct AlbumHeader: View {
     let albumImageName: String
     @Binding var isPlaying: Bool
     @Binding var isLiked: Bool
-    let onShare: () -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -132,7 +176,6 @@ struct AlbumHeader: View {
                 ListenButton(isPlaying: $isPlaying)
                 Spacer()
                 LikeButton(isLiked: $isLiked)
-                ShareButton(onTap: onShare)
             }
             .padding(.horizontal, 16)
         }
@@ -148,70 +191,20 @@ struct AlbumTrackList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Album Tracks")
-                .font(.Title2)
+                .font(.Headline5)
                 .foregroundColor(.fill1)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 16)
+                .padding(.bottom, 8)
             
             VStack(spacing: 0) {
                 ForEach(tracks, id: \.id) { track in
-                    AlbumTrackRow(track: track, albumImageName: albumImageName)
+                    TrackRow(track: track)
                 }
             }
         }
     }
 }
 
-struct AlbumTrackRow: View {
-    let track: Track
-    let albumImageName: String
-    @State private var isPlaying = false
-    
-    // track item
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(albumImageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 48, height: 48)
-                .cornerRadius(4)
-                .overlay(
-                        RoundedRectangle(cornerRadius: 4)
-                            .stroke(Color.white.opacity(0.1), lineWidth: 1)
-                    )
-            
-            VStack(alignment: .leading, spacing: 0) {
-                Text(track.title)
-                    .font(.Text1)
-                    .foregroundColor(.fill1)
-                
-                Text(track.artist)
-                    .font(.Text1)
-                    .foregroundColor(.subtitle)
-            }
-            
-            Spacer()
-            
-            Button(action: {}) {
-                Image(systemName: "ellipsis")
-                    .font(.Text1)
-                    .foregroundColor(.subtitle)
-                    .frame(width: 40, height: 40)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 8)
-        .contentShape(Rectangle())
-        .onTapGesture { isPlaying.toggle() }
-        .overlay(
-            Rectangle()
-                .fill(Color.white.opacity(0.15))
-                .frame(height: 0.5)
-                .padding(.horizontal, 16),
-            alignment: .bottom
-        )
-    }
-}
 
 #Preview {
     NavigationStack {

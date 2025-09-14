@@ -1,0 +1,4 @@
+module VariableBlur {
+header "VariableBlur-Swift.h"
+export *
+}

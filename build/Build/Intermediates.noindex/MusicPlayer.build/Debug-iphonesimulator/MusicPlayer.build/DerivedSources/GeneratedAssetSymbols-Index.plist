@@ -60,11 +60,61 @@
 			<key>catalogPath</key>
 			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
 			<key>objcSymbol</key>
+			<string>ACImageNameAquarium</string>
+			<key>relativePath</key>
+			<string>./albums/aquarium.imageset</string>
+			<key>swiftSymbol</key>
+			<string>aquarium</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
 			<string>ACImageNameBackward</string>
 			<key>relativePath</key>
 			<string>./backward.imageset</string>
 			<key>swiftSymbol</key>
 			<string>backward</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameBenson</string>
+			<key>relativePath</key>
+			<string>./albums/benson.imageset</string>
+			<key>swiftSymbol</key>
+			<string>benson</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameBensonBoone</string>
+			<key>relativePath</key>
+			<string>./artists/benson boone.imageset</string>
+			<key>swiftSymbol</key>
+			<string>bensonBoone</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameBlur</string>
+			<key>relativePath</key>
+			<string>./albums/blur.imageset</string>
+			<key>swiftSymbol</key>
+			<string>blur</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameCure</string>
+			<key>relativePath</key>
+			<string>./albums/cure.imageset</string>
+			<key>swiftSymbol</key>
+			<string>cure</string>
 		</dict>
 		<dict>
 			<key>catalogPath</key>
@@ -120,6 +170,26 @@
 			<key>catalogPath</key>
 			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
 			<key>objcSymbol</key>
+			<string>ACImageNameLoveLetters</string>
+			<key>relativePath</key>
+			<string>./albums/love letters.imageset</string>
+			<key>swiftSymbol</key>
+			<string>loveLetters</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameMyBloodyValentine</string>
+			<key>relativePath</key>
+			<string>./artists/my bloody valentine.imageset</string>
+			<key>swiftSymbol</key>
+			<string>myBloodyValentine</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
 			<string>ACImageNamePause</string>
 			<key>relativePath</key>
 			<string>./pause.imageset</string>
@@ -130,11 +200,81 @@
 			<key>catalogPath</key>
 			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
 			<key>objcSymbol</key>
+			<string>ACImageNamePixies</string>
+			<key>relativePath</key>
+			<string>./artists/pixies.imageset</string>
+			<key>swiftSymbol</key>
+			<string>pixies</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
 			<string>ACImageNamePlay</string>
 			<key>relativePath</key>
 			<string>./play.imageset</string>
 			<key>swiftSymbol</key>
 			<string>play</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameSonic</string>
+			<key>relativePath</key>
+			<string>./albums/sonic.imageset</string>
+			<key>swiftSymbol</key>
+			<string>sonic</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameTeddySwims</string>
+			<key>relativePath</key>
+			<string>./artists/teddy swims.imageset</string>
+			<key>swiftSymbol</key>
+			<string>teddySwims</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameTul8Et</string>
+			<key>relativePath</key>
+			<string>./artists/tul8et.imageset</string>
+			<key>swiftSymbol</key>
+			<string>tul8Et</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameUglymoss</string>
+			<key>relativePath</key>
+			<string>./albums/uglymoss.imageset</string>
+			<key>swiftSymbol</key>
+			<string>uglymoss</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameUserpic</string>
+			<key>relativePath</key>
+			<string>./userpic.imageset</string>
+			<key>swiftSymbol</key>
+			<string>userpic</string>
+		</dict>
+		<dict>
+			<key>catalogPath</key>
+			<string>/Users/dimazhuravlev/Documents/MusicPlayer/MusicPlayer/Assets.xcassets</string>
+			<key>objcSymbol</key>
+			<string>ACImageNameWegz</string>
+			<key>relativePath</key>
+			<string>./artists/wegz.imageset</string>
+			<key>swiftSymbol</key>
+			<string>wegz</string>
 		</dict>
 	</array>
 	<key>symbols</key>

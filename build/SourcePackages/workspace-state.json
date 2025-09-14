@@ -1,0 +1,30 @@
+{
+  "object" : {
+    "artifacts" : [
+
+    ],
+    "dependencies" : [
+      {
+        "basedOn" : null,
+        "packageRef" : {
+          "identity" : "variableblur",
+          "kind" : "remoteSourceControl",
+          "location" : "https://github.com/nikstar/VariableBlur",
+          "name" : "VariableBlur"
+        },
+        "state" : {
+          "checkoutState" : {
+            "branch" : "main",
+            "revision" : "c8dc0ada195dfd47354cec5994c2dd434aa6c146"
+          },
+          "name" : "sourceControlCheckout"
+        },
+        "subpath" : "VariableBlur"
+      }
+    ],
+    "prebuilts" : [
+
+    ]
+  },
+  "version" : 7
+}

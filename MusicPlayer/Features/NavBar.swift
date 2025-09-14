@@ -1,6 +1,35 @@
 import SwiftUI
 import VariableBlur
 
+// MARK: - Scroll Position Tracking
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}
+
+struct ScrollOffsetModifier: ViewModifier {
+    let coordinateSpace: String
+    @Binding var offset: CGFloat
+    
+    func body(content: Content) -> some View {
+        content
+            .background(
+                GeometryReader { geometry in
+                    Color.clear
+                        .preference(
+                            key: ScrollOffsetPreferenceKey.self,
+                            value: -geometry.frame(in: .named(coordinateSpace)).minY
+                        )
+                }
+            )
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                offset = value
+            }
+    }
+}
+
 struct NavBar: View {
     @Environment(\.dismiss) private var dismiss
     
@@ -9,19 +38,28 @@ struct NavBar: View {
     let onSearchTap: (() -> Void)?
     let contentName: String?
     let contentImageName: String?
+    let scrollOffset: CGFloat
     
     init(
         showBackButton: Bool = true,
         showSearchButton: Bool = true,
         onSearchTap: (() -> Void)? = nil,
         contentName: String? = nil,
-        contentImageName: String? = nil
+        contentImageName: String? = nil,
+        scrollOffset: CGFloat = 0
     ) {
         self.showBackButton = showBackButton
         self.showSearchButton = showSearchButton
         self.onSearchTap = onSearchTap
         self.contentName = contentName
         self.contentImageName = contentImageName
+        self.scrollOffset = scrollOffset
+    }
+    
+    // MARK: - Computed Properties
+    private var contentVisibility: Double {
+        // Content appears smoothly when scroll position reaches 360
+        return scrollOffset >= 360 ? 1.0 : 0.0
     }
     
     var body: some View {
@@ -47,6 +85,8 @@ struct NavBar: View {
                         .foregroundColor(.fill1)
                         .lineLimit(1)
                 }
+                .opacity(contentVisibility)
+                .animation(.easeInOut(duration: 0.4), value: scrollOffset)
             }
             
             Spacer()
@@ -123,5 +163,12 @@ struct SearchButton: View {
                 .background(Color.white.opacity(0.1))
                 .clipShape(Circle())
         }
+    }
+}
+
+// MARK: - View Extension
+extension View {
+    func trackScrollOffset(in coordinateSpace: String, offset: Binding<CGFloat>) -> some View {
+        self.modifier(ScrollOffsetModifier(coordinateSpace: coordinateSpace, offset: offset))
     }
 }

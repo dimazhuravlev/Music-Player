@@ -1,12 +1,13 @@
 import SwiftUI
+import VariableBlur
 
 struct Playlist: View {
     let playlistName: String?
     
     @State private var isPlaying = false
     @State private var isLiked = false
-    @State private var showShareAlert = false
     @State private var selectedFilter = "Top"
+    @State private var scrollOffset: CGFloat = 0
     
     init(playlistName: String? = nil) {
         self.playlistName = playlistName
@@ -24,7 +25,8 @@ struct Playlist: View {
                     showSearchButton: true,
                     onSearchTap: {},
                     contentName: playlistName,
-                    contentImageName: playlistImageName
+                    contentImageName: playlistImageName,
+                    scrollOffset: scrollOffset
                 )
                 Spacer()
             }
@@ -32,13 +34,6 @@ struct Playlist: View {
         #if os(iOS)
         .navigationBarHidden(true)
         #endif
-        .alert("Share Playlist", isPresented: $showShareAlert) {
-            Button("Copy Link") { }
-            Button("Share via Message") { }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("Choose how you'd like to share this playlist")
-        }
     }
     
     private var backgroundView: some View {
@@ -48,27 +43,104 @@ struct Playlist: View {
     private var contentView: some View {
         ScrollView {
             VStack(spacing: 0) {
-                ArtistHeader(
-                    playlistName: playlistName,
-                    playlistImageName: playlistImageName,
-                    isPlaying: $isPlaying,
-                    isLiked: $isLiked,
-                    selectedFilter: $selectedFilter,
-                    onShare: { showShareAlert = true }
-                )
+                // Invisible tracking view at the top
+                Color.clear
+                    .frame(height: 1)
+                    .trackScrollOffset(in: "scroll", offset: $scrollOffset)
+                
+                // ZStack with image and content overlaid
+                ZStack(alignment: .bottomLeading) {
+                    // Image layer (always square shape)
+                    Image(playlistImageName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                        .clipped()
+                        .overlay(
+                            VStack {
+                                Spacer()
+                                ZStack(alignment: .bottom) {
+                                    VariableBlurView(maxBlurRadius: 8, direction: .blurredBottomClearTop)
+                                        .frame(height: 80)
+                                        .frame(maxWidth: .infinity)                        
+                                    LinearGradient(
+                                        stops: [
+                                        Gradient.Stop(color: .black.opacity(0), location: 0.00),
+                                        Gradient.Stop(color: .black.opacity(0.01), location: 0.12),
+                                        Gradient.Stop(color: .black.opacity(0.03), location: 0.21),
+                                        Gradient.Stop(color: .black.opacity(0.07), location: 0.29),
+                                        Gradient.Stop(color: .black.opacity(0.12), location: 0.35),
+                                        Gradient.Stop(color: .black.opacity(0.18), location: 0.40),
+                                        Gradient.Stop(color: .black.opacity(0.25), location: 0.45),
+                                        Gradient.Stop(color: .black.opacity(0.33), location: 0.48),
+                                        Gradient.Stop(color: .black.opacity(0.41), location: 0.52),
+                                        Gradient.Stop(color: .black.opacity(0.5), location: 0.55),
+                                        Gradient.Stop(color: .black.opacity(0.59), location: 0.60),
+                                        Gradient.Stop(color: .black.opacity(0.67), location: 0.65),
+                                        Gradient.Stop(color: .black.opacity(0.76), location: 0.71),
+                                        Gradient.Stop(color: .black.opacity(0.85), location: 0.79),
+                                        Gradient.Stop(color: .black.opacity(0.93), location: 0.88),
+                                        Gradient.Stop(color: .black, location: 1.00),
+                                        ],
+                                        startPoint: UnitPoint(x: 0.5, y: 0),
+                                        endPoint: UnitPoint(x: 0.5, y: 1)
+                                    )
+                                    .frame(height: 120)
+                                    .frame(maxWidth: .infinity)
+                                }
+                            }
+                        )
+                    
+                    // Content VStack overlaid on image
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text(playlistName ?? "Playlist")
+                            .font(.Headline1)
+                            .foregroundColor(.fill1)
+                            .padding(.horizontal, 16)
+                        
+                        HStack(spacing: 6) {
+                            ListenButton(isPlaying: $isPlaying)
+                            Spacer()
+                            LikeButton(isLiked: $isLiked)
+                        }
+                        .padding(.horizontal, 16)
+                        
+                        FilterCarousel(selectedFilter: $selectedFilter)
+                            .padding(.horizontal, 16)
+                    }
+                    .padding(.bottom, 24)
+                    .offset(y: 100)
+                }
+                
+                // TrackList below the image
                 TrackList(tracks: sampleTracks, playlistImageName: playlistImageName)
+                    .offset(y: 100)
+                
                 Spacer(minLength: 120)
             }
         }
+        .coordinateSpace(name: "scroll")
         .ignoresSafeArea(.container, edges: .top)
     }
     
     
     private var sampleTracks: [Track] {
         [
-            Track(id: 1, title: "Ramsis Paris", artist: "Wegz"),
-            Track(id: 2, title: "Gada3 W Zeen", artist: "Kan, double Zuksh"),
-            Track(id: 3, title: "Ramsis Paris", artist: "Sharmoofers, Perrie")
+            Track(id: 1, title: "Ramsis Paris", artist: "Wegz", albumCover: "benson"),
+            Track(id: 2, title: "Gada3 W Zeen", artist: "Kan, double Zuksh", albumCover: "love letters"),
+            Track(id: 3, title: "Ramsis Paris", artist: "Sharmoofers, Perrie", albumCover: "blur"),
+            Track(id: 4, title: "El Bint El Helwa", artist: "Amr Diab", albumCover: "cure"),
+            Track(id: 5, title: "Habibi Ya Nour El Ein", artist: "Amr Diab", albumCover: "aquarium"),
+            Track(id: 6, title: "Tamally Maak", artist: "Amr Diab", albumCover: "sonic"),
+            Track(id: 7, title: "Ana Baashaak", artist: "Tamer Hosny", albumCover: "uglymoss"),
+            Track(id: 8, title: "El Donia Helwa", artist: "Tamer Hosny", albumCover: "benson"),
+            Track(id: 9, title: "Ya Ghali", artist: "Mohamed Mounir", albumCover: "love letters"),
+            Track(id: 10, title: "El Bahr Byedhak", artist: "Mohamed Mounir", albumCover: "blur"),
+            Track(id: 11, title: "Salam Aleik", artist: "Fairuz", albumCover: "cure"),
+            Track(id: 12, title: "Kifak Inta", artist: "Fairuz", albumCover: "aquarium"),
+            Track(id: 13, title: "Ya Rayt", artist: "Fairuz", albumCover: "sonic"),
+            Track(id: 14, title: "Nassam Alayna El Hawa", artist: "Fairuz", albumCover: "uglymoss"),
+            Track(id: 15, title: "Aatini El Nay", artist: "Fairuz", albumCover: "benson")
         ]
     }
     
@@ -101,32 +173,25 @@ struct ArtistHeader: View {
     let onShare: () -> Void
     
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
+        ZStack {
             artistImage
             artistInfo
         }
     }
     
     private var artistImage: some View {
-        Image(playlistImageName)
-            .resizable()
-            .scaledToFill()
-            .frame(maxWidth: .infinity)
-            .frame(height: 400)
-            .clipped()
-            .overlay(gradientOverlay)
-    }
-    
-    private var gradientOverlay: some View {
-        LinearGradient(
-            gradient: Gradient(colors: [
-                .clear,
-                .black.opacity(0.3),
-                .black.opacity(1)
-            ]),
-            startPoint: .top,
-            endPoint: .bottom
-        )
+        ZStack(alignment: .bottom) {
+            Image(playlistImageName)
+                .resizable()
+                .scaledToFill()
+                .frame(maxWidth: .infinity)
+                .aspectRatio(1/1, contentMode: .fill)
+                .clipped()
+            
+            VariableBlurView(maxBlurRadius: 20, direction: .blurredBottomClearTop)
+                .frame(height: 160)
+                .frame(maxWidth: .infinity)
+        }
     }
     
     private var artistInfo: some View {
@@ -135,17 +200,17 @@ struct ArtistHeader: View {
                 .font(.Headline1)
                 .foregroundColor(.fill1)
             
-            HStack(spacing: 12) {
+            HStack(spacing: 6) {
                 ListenButton(isPlaying: $isPlaying)
                 Spacer()
                 LikeButton(isLiked: $isLiked)
-                ShareButton(onTap: onShare)
             }
             
             FilterCarousel(selectedFilter: $selectedFilter)
         }
-        .padding(.horizontal, 20)
+        .padding(.horizontal, 16)
         .padding(.bottom, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
     }
 }
 
@@ -155,10 +220,16 @@ struct ListenButton: View {
     var body: some View {
         Button(action: { isPlaying.toggle() }) {
             HStack(spacing: 8) {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    .font(.system(size: 16, weight: .semibold))
+                AnimatedIconButton(
+                    icon1: "play",
+                    icon2: "pause",
+                    isActive: isPlaying,
+                    iconSize: 20
+                ) {
+                    isPlaying.toggle()
+                }
                 Text("Listen")
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.Text1)
             }
             .foregroundColor(.fill1)
             .padding(.horizontal, 24)
@@ -174,30 +245,21 @@ struct LikeButton: View {
     
     var body: some View {
         Button(action: { isLiked.toggle() }) {
-            Image(systemName: isLiked ? "heart.fill" : "heart")
-                .font(.system(size: 20))
-                .foregroundColor(isLiked ? .red : .fill1)
-                .frame(width: 44, height: 44)
-                .background(Color.white.opacity(0.1))
-                .clipShape(Circle())
+            AnimatedIconButton(
+                icon1: "like-default",
+                icon2: "like-active",
+                isActive: isLiked,
+                iconSize: 20
+            ) {
+                isLiked.toggle()
+            }
+            .frame(width: 40, height: 40)
+            .background(Color.white.opacity(0.1))
+            .clipShape(Circle())
         }
     }
 }
 
-struct ShareButton: View {
-    let onTap: () -> Void
-    
-    var body: some View {
-        Button(action: onTap) {
-            Image(systemName: "square.and.arrow.up")
-                .font(.system(size: 20))
-                .foregroundColor(.fill1)
-                .frame(width: 44, height: 44)
-                .background(Color.white.opacity(0.1))
-                .clipShape(Circle())
-        }
-    }
-}
 
 struct FilterCarousel: View {
     @Binding var selectedFilter: String
@@ -223,9 +285,9 @@ struct FilterCarousel: View {
                     )
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 16)
         }
-        .padding(.horizontal, -20)
+        .padding(.horizontal, -16)
         .onAppear {
             animateFilters = true
         }
@@ -266,66 +328,20 @@ struct TrackList: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Top Tracks")
-                .font(.Text3)
+                .font(.Headline5)
                 .foregroundColor(.fill1)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 24)
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
             
             VStack(spacing: 0) {
                 ForEach(tracks, id: \.id) { track in
-                    TrackRow(track: track, playlistImageName: playlistImageName)
+                    TrackRow(track: track)
                 }
             }
         }
     }
 }
 
-struct TrackRow: View {
-    let track: Track
-    let playlistImageName: String
-    @State private var isPlaying = false
-    
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(playlistImageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: 50, height: 50)
-                .cornerRadius(8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(track.title)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.fill1)
-                
-                Text(track.artist)
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
-            }
-            
-            Spacer()
-            
-            Button(action: {}) {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 16))
-                    .foregroundColor(.gray)
-                    .frame(width: 44, height: 44)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .contentShape(Rectangle())
-        .onTapGesture { isPlaying.toggle() }
-    }
-}
-
-// MARK: - Models
-
-struct Track {
-    let id: Int
-    let title: String
-    let artist: String
-}
 
 #Preview {
     NavigationStack {

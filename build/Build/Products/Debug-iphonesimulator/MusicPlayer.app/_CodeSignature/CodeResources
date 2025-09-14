@@ -6,7 +6,7 @@
 	<dict>
 		<key>Assets.car</key>
 		<data>
-		oV637eZ9PEhIVrmYSS/fK9cOAWs=
+		l1Y5ZHzklzJRQkusUCwVrqoxkHQ=
 		</data>
 		<key>Info.plist</key>
 		<data>
@@ -14,7 +14,7 @@
 		</data>
 		<key>MusicPlayer.debug.dylib</key>
 		<data>
-		Nf0yxn+2pnx5wwEWJyXAN6XZ/GI=
+		lb1hMJncpPbLSkj6zHk3CtnXLME=
 		</data>
 		<key>PkgInfo</key>
 		<data>
@@ -23,6 +23,14 @@
 		<key>README.md</key>
 		<data>
 		HVWn5i8xWmLLway6+CDOcf3q4oo=
+		</data>
+		<key>YangoGroupHeadline-Bold.otf</key>
+		<data>
+		HVZXVtZoCw1PKZlZkNVs7emoH3Y=
+		</data>
+		<key>YangoText-Medium.ttf</key>
+		<data>
+		AUO0OMxq8eMJLkodNkxM3qoqVEw=
 		</data>
 		<key>__preview.dylib</key>
 		<data>
@@ -35,14 +43,14 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			W8Q2fYbIXvmz2jSwKA5wnscvUlbb5PQrgj/GJUaVfOI=
+			Z5bQ2Wj7Po5EWdyTfnVXAt2j9aUjJKEoHMRnvZhG65o=
 			</data>
 		</dict>
 		<key>MusicPlayer.debug.dylib</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			mvEBZKYREsTA/72SwR14LrRKy3nOFUUN31F68DhGUUE=
+			pLcsvYD739nh4/BKx1hOn2k9GPbuvMq31TlM7nzjEaM=
 			</data>
 		</dict>
 		<key>README.md</key>
@@ -50,6 +58,20 @@
 			<key>hash2</key>
 			<data>
 			B3fCK1BJ4MQkd8JufjOZ/6Ac/ItK5orwudacranjIyg=
+			</data>
+		</dict>
+		<key>YangoGroupHeadline-Bold.otf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			TCcwFgzYSPtY/hC2hCuCnOrWa14Yn9XTTfymgrtp2K8=
+			</data>
+		</dict>
+		<key>YangoText-Medium.ttf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			w+tPqEsWLUlOg6oAiN5ily+GCLNLcqnqj2iMo9Bs+co=
 			</data>
 		</dict>
 		<key>__preview.dylib</key>

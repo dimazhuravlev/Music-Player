@@ -46,8 +46,23 @@ extension DeveloperToolsSupport.ImageResource {
     /// The "album" asset catalog image resource.
     static let album = DeveloperToolsSupport.ImageResource(name: "album", bundle: resourceBundle)
 
+    /// The "aquarium" asset catalog image resource.
+    static let aquarium = DeveloperToolsSupport.ImageResource(name: "aquarium", bundle: resourceBundle)
+
     /// The "backward" asset catalog image resource.
     static let backward = DeveloperToolsSupport.ImageResource(name: "backward", bundle: resourceBundle)
+
+    /// The "benson" asset catalog image resource.
+    static let benson = DeveloperToolsSupport.ImageResource(name: "benson", bundle: resourceBundle)
+
+    /// The "benson boone" asset catalog image resource.
+    static let bensonBoone = DeveloperToolsSupport.ImageResource(name: "benson boone", bundle: resourceBundle)
+
+    /// The "blur" asset catalog image resource.
+    static let blur = DeveloperToolsSupport.ImageResource(name: "blur", bundle: resourceBundle)
+
+    /// The "cure" asset catalog image resource.
+    static let cure = DeveloperToolsSupport.ImageResource(name: "cure", bundle: resourceBundle)
 
     /// The "dislike-active" asset catalog image resource.
     static let dislikeActive = DeveloperToolsSupport.ImageResource(name: "dislike-active", bundle: resourceBundle)
@@ -64,11 +79,38 @@ extension DeveloperToolsSupport.ImageResource {
     /// The "like-default" asset catalog image resource.
     static let likeDefault = DeveloperToolsSupport.ImageResource(name: "like-default", bundle: resourceBundle)
 
+    /// The "love letters" asset catalog image resource.
+    static let loveLetters = DeveloperToolsSupport.ImageResource(name: "love letters", bundle: resourceBundle)
+
+    /// The "my bloody valentine" asset catalog image resource.
+    static let myBloodyValentine = DeveloperToolsSupport.ImageResource(name: "my bloody valentine", bundle: resourceBundle)
+
     /// The "pause" asset catalog image resource.
     static let pause = DeveloperToolsSupport.ImageResource(name: "pause", bundle: resourceBundle)
 
+    /// The "pixies" asset catalog image resource.
+    static let pixies = DeveloperToolsSupport.ImageResource(name: "pixies", bundle: resourceBundle)
+
     /// The "play" asset catalog image resource.
     static let play = DeveloperToolsSupport.ImageResource(name: "play", bundle: resourceBundle)
+
+    /// The "sonic" asset catalog image resource.
+    static let sonic = DeveloperToolsSupport.ImageResource(name: "sonic", bundle: resourceBundle)
+
+    /// The "teddy swims" asset catalog image resource.
+    static let teddySwims = DeveloperToolsSupport.ImageResource(name: "teddy swims", bundle: resourceBundle)
+
+    /// The "tul8et" asset catalog image resource.
+    static let tul8Et = DeveloperToolsSupport.ImageResource(name: "tul8et", bundle: resourceBundle)
+
+    /// The "uglymoss" asset catalog image resource.
+    static let uglymoss = DeveloperToolsSupport.ImageResource(name: "uglymoss", bundle: resourceBundle)
+
+    /// The "userpic" asset catalog image resource.
+    static let userpic = DeveloperToolsSupport.ImageResource(name: "userpic", bundle: resourceBundle)
+
+    /// The "wegz" asset catalog image resource.
+    static let wegz = DeveloperToolsSupport.ImageResource(name: "wegz", bundle: resourceBundle)
 
 }
 
@@ -154,10 +196,55 @@ extension AppKit.NSImage {
 #endif
     }
 
+    /// The "aquarium" asset catalog image.
+    static var aquarium: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .aquarium)
+#else
+        .init()
+#endif
+    }
+
     /// The "backward" asset catalog image.
     static var backward: AppKit.NSImage {
 #if !targetEnvironment(macCatalyst)
         .init(resource: .backward)
+#else
+        .init()
+#endif
+    }
+
+    /// The "benson" asset catalog image.
+    static var benson: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .benson)
+#else
+        .init()
+#endif
+    }
+
+    /// The "benson boone" asset catalog image.
+    static var bensonBoone: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .bensonBoone)
+#else
+        .init()
+#endif
+    }
+
+    /// The "blur" asset catalog image.
+    static var blur: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .blur)
+#else
+        .init()
+#endif
+    }
+
+    /// The "cure" asset catalog image.
+    static var cure: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .cure)
 #else
         .init()
 #endif
@@ -208,6 +295,24 @@ extension AppKit.NSImage {
 #endif
     }
 
+    /// The "love letters" asset catalog image.
+    static var loveLetters: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .loveLetters)
+#else
+        .init()
+#endif
+    }
+
+    /// The "my bloody valentine" asset catalog image.
+    static var myBloodyValentine: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .myBloodyValentine)
+#else
+        .init()
+#endif
+    }
+
     /// The "pause" asset catalog image.
     static var pause: AppKit.NSImage {
 #if !targetEnvironment(macCatalyst)
@@ -217,10 +322,73 @@ extension AppKit.NSImage {
 #endif
     }
 
+    /// The "pixies" asset catalog image.
+    static var pixies: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .pixies)
+#else
+        .init()
+#endif
+    }
+
     /// The "play" asset catalog image.
     static var play: AppKit.NSImage {
 #if !targetEnvironment(macCatalyst)
         .init(resource: .play)
+#else
+        .init()
+#endif
+    }
+
+    /// The "sonic" asset catalog image.
+    static var sonic: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .sonic)
+#else
+        .init()
+#endif
+    }
+
+    /// The "teddy swims" asset catalog image.
+    static var teddySwims: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .teddySwims)
+#else
+        .init()
+#endif
+    }
+
+    /// The "tul8et" asset catalog image.
+    static var tul8Et: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .tul8Et)
+#else
+        .init()
+#endif
+    }
+
+    /// The "uglymoss" asset catalog image.
+    static var uglymoss: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .uglymoss)
+#else
+        .init()
+#endif
+    }
+
+    /// The "userpic" asset catalog image.
+    static var userpic: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .userpic)
+#else
+        .init()
+#endif
+    }
+
+    /// The "wegz" asset catalog image.
+    static var wegz: AppKit.NSImage {
+#if !targetEnvironment(macCatalyst)
+        .init(resource: .wegz)
 #else
         .init()
 #endif
@@ -279,10 +447,55 @@ extension UIKit.UIImage {
 #endif
     }
 
+    /// The "aquarium" asset catalog image.
+    static var aquarium: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .aquarium)
+#else
+        .init()
+#endif
+    }
+
     /// The "backward" asset catalog image.
     static var backward: UIKit.UIImage {
 #if !os(watchOS)
         .init(resource: .backward)
+#else
+        .init()
+#endif
+    }
+
+    /// The "benson" asset catalog image.
+    static var benson: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .benson)
+#else
+        .init()
+#endif
+    }
+
+    /// The "benson boone" asset catalog image.
+    static var bensonBoone: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .bensonBoone)
+#else
+        .init()
+#endif
+    }
+
+    /// The "blur" asset catalog image.
+    static var blur: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .blur)
+#else
+        .init()
+#endif
+    }
+
+    /// The "cure" asset catalog image.
+    static var cure: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .cure)
 #else
         .init()
 #endif
@@ -333,6 +546,24 @@ extension UIKit.UIImage {
 #endif
     }
 
+    /// The "love letters" asset catalog image.
+    static var loveLetters: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .loveLetters)
+#else
+        .init()
+#endif
+    }
+
+    /// The "my bloody valentine" asset catalog image.
+    static var myBloodyValentine: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .myBloodyValentine)
+#else
+        .init()
+#endif
+    }
+
     /// The "pause" asset catalog image.
     static var pause: UIKit.UIImage {
 #if !os(watchOS)
@@ -342,10 +573,73 @@ extension UIKit.UIImage {
 #endif
     }
 
+    /// The "pixies" asset catalog image.
+    static var pixies: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .pixies)
+#else
+        .init()
+#endif
+    }
+
     /// The "play" asset catalog image.
     static var play: UIKit.UIImage {
 #if !os(watchOS)
         .init(resource: .play)
+#else
+        .init()
+#endif
+    }
+
+    /// The "sonic" asset catalog image.
+    static var sonic: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .sonic)
+#else
+        .init()
+#endif
+    }
+
+    /// The "teddy swims" asset catalog image.
+    static var teddySwims: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .teddySwims)
+#else
+        .init()
+#endif
+    }
+
+    /// The "tul8et" asset catalog image.
+    static var tul8Et: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .tul8Et)
+#else
+        .init()
+#endif
+    }
+
+    /// The "uglymoss" asset catalog image.
+    static var uglymoss: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .uglymoss)
+#else
+        .init()
+#endif
+    }
+
+    /// The "userpic" asset catalog image.
+    static var userpic: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .userpic)
+#else
+        .init()
+#endif
+    }
+
+    /// The "wegz" asset catalog image.
+    static var wegz: UIKit.UIImage {
+#if !os(watchOS)
+        .init(resource: .wegz)
 #else
         .init()
 #endif

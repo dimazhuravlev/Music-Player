@@ -1,0 +1,18 @@
+{
+  "" : {
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur-master.dia",
+    "emit-module-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur-master-emit-module.dia",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur-master.swiftdeps"
+  },
+  "/Users/dimazhuravlev/Documents/MusicPlayer/build/SourcePackages/checkouts/VariableBlur/Sources/VariableBlur/VariableBlur.swift" : {
+    "const-values" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur.swiftconstvalues",
+    "dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur.d",
+    "diagnostics" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur.dia",
+    "index-unit-output-path" : "/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur.o",
+    "llvm-bc" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur.bc",
+    "object" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur.o",
+    "swift-dependencies" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur.swiftdeps",
+    "swiftmodule" : "/Users/dimazhuravlev/Documents/MusicPlayer/build/Build/Intermediates.noindex/VariableBlur.build/Debug-iphonesimulator/VariableBlur.build/Objects-normal/arm64/VariableBlur~partial.swiftmodule"
+  }
+}
