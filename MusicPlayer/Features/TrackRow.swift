@@ -7,6 +7,7 @@ struct Track {
     let title: String
     let artist: String
     let albumCover: String
+    let releaseYear: Int
 }
 
 struct TrackRow: View {
@@ -22,17 +23,19 @@ struct TrackRow: View {
                 .cornerRadius(6)
                 .overlay(
                     RoundedRectangle(cornerRadius: 5)
-                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
                 )
             
             VStack(alignment: .leading, spacing: 0) {
                 Text(track.title)
                     .font(.Text1)
                     .foregroundColor(.fill1)
+                    .lineLimit(1)
                 
                 Text(track.artist)
                     .font(.Text1)
                     .foregroundColor(.subtitle)
+                    .lineLimit(1)
             }
             
             Spacer()

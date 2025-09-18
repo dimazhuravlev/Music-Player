@@ -1,6 +1,0 @@
-Target dependency graph (3 targets)
-Target 'MusicPlayer' in project 'MusicPlayer'
-➜ Explicit dependency on target 'VariableBlur' in project 'VariableBlur'
-Target 'VariableBlur' in project 'VariableBlur'
-➜ Explicit dependency on target 'VariableBlur' in project 'VariableBlur'
-Target 'VariableBlur' in project 'VariableBlur' (no dependencies)

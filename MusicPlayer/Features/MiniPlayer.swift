@@ -12,6 +12,10 @@ struct MiniPlayer: View {
                 .scaledToFill()
                 .frame(width: 40, height: 40)
                 .cornerRadius(6)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
+                )
             
             // Animated play/pause icon
             AnimatedIconButton(
@@ -24,10 +28,12 @@ struct MiniPlayer: View {
             }
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 8)
-        .background(
+        .padding(.vertical, 10)
+        .background(.ultraThinMaterial.opacity(0.5))
+        .cornerRadius(72)
+        .overlay(
             RoundedRectangle(cornerRadius: 72)
-                .fill(.thinMaterial)
+            .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
         )
         .onTapGesture {
             onTap?()

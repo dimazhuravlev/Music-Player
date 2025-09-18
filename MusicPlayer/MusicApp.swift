@@ -1,5 +1,4 @@
 import SwiftUI
-import VariableBlur
 
 @main
 struct MusicApp: App {
@@ -10,9 +9,15 @@ struct MusicApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NavigationStack {
-                MainContentView()
-            }
+            AppRootView()
+        }
+    }
+}
+
+struct AppRootView: View {
+    var body: some View {
+        NavigationStack {
+            MainContentView()
         }
     }
 }

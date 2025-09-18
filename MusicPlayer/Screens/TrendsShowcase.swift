@@ -67,7 +67,7 @@ struct TrendsShowcase: View {
                 .ignoresSafeArea()
             
             // Scrollable content
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 32) {
                     // New Releases Carousel
                     NewReleaseCarousel(

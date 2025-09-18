@@ -28,6 +28,12 @@ struct Album: View {
                 )
                 Spacer()
             }
+            
+            // Fixed bottom bar that stays in place during navigation
+            VStack {
+                Spacer()
+                BottomBar()
+            }
         }
         #if os(iOS)
         .navigationBarHidden(true)
@@ -49,11 +55,15 @@ struct Album: View {
                 AlbumHeader(
                     albumName: albumName,
                     albumImageName: albumImageName,
+                    artistImageName: artistImageName,
+                    artistName: artistName,
+                    releaseYear: releaseYear,
+                    artistBio: artistBio,
                     isPlaying: $isPlaying,
                     isLiked: $isLiked
                 )
                 
-                AlbumTrackList(tracks: sampleTracks, albumImageName: albumImageName)
+                AlbumTrackList(tracks: albumTracks, albumImageName: albumImageName)
                 Spacer(minLength: 120)
             }
         }
@@ -62,79 +72,19 @@ struct Album: View {
     }
     
     
-    private var sampleTracks: [Track] {
-        [
-            Track(id: 1, title: "Beautiful Things", artist: "Benson Boone", albumCover: albumImageName),
-            Track(id: 2, title: "Love Letters", artist: "Saint Levant", albumCover: albumImageName),
-            Track(id: 3, title: "Song 2", artist: "Blur", albumCover: albumImageName),
-            Track(id: 4, title: "Friday I'm in Love", artist: "The Cure", albumCover: albumImageName),
-            Track(id: 5, title: "Equinox", artist: "Aquarium", albumCover: albumImageName),
-            Track(id: 6, title: "Bohemian Rhapsody", artist: "Queen", albumCover: albumImageName),
-            Track(id: 7, title: "Hotel California", artist: "Eagles", albumCover: albumImageName),
-            Track(id: 8, title: "Imagine", artist: "John Lennon", albumCover: albumImageName),
-            Track(id: 9, title: "Billie Jean", artist: "Michael Jackson", albumCover: albumImageName),
-            Track(id: 10, title: "Sweet Child O' Mine", artist: "Guns N' Roses", albumCover: albumImageName),
-            Track(id: 11, title: "Stairway to Heaven", artist: "Led Zeppelin", albumCover: albumImageName),
-            Track(id: 12, title: "Smells Like Teen Spirit", artist: "Nirvana", albumCover: albumImageName),
-            Track(id: 13, title: "Like a Rolling Stone", artist: "Bob Dylan", albumCover: albumImageName),
-            Track(id: 14, title: "What's Going On", artist: "Marvin Gaye", albumCover: albumImageName),
-            Track(id: 15, title: "Good Vibrations", artist: "The Beach Boys", albumCover: albumImageName),
-            Track(id: 16, title: "Johnny B. Goode", artist: "Chuck Berry", albumCover: albumImageName),
-            Track(id: 17, title: "Hey Jude", artist: "The Beatles", albumCover: albumImageName),
-            Track(id: 18, title: "Purple Rain", artist: "Prince", albumCover: albumImageName),
-            Track(id: 19, title: "Born to Run", artist: "Bruce Springsteen", albumCover: albumImageName),
-            Track(id: 20, title: "Respect", artist: "Aretha Franklin", albumCover: albumImageName)
-        ]
+    private var albumTracks: [Track] {
+        return TrackDataManager.shared.getSampleTracks()
     }
     
-    private var albumImageName: String {
-        guard let albumName = albumName else { return "album" }
-        
-        switch albumName {
-        case "Beautiful Things":
-            return "benson"
-        case "Love Letters / رسائل حب":
-            return "love letters"
-        case "Song 2":
-            return "blur"
-        case "Friday I'm in Love":
-            return "cure"
-        case "Equinox":
-            return "aquarium"
-        case "Bohemian Rhapsody":
-            return "queen"
-        case "Hotel California":
-            return "eagles"
-        case "Imagine":
-            return "john lennon"
-        case "Billie Jean":
-            return "michael jackson"
-        case "Sweet Child O' Mine":
-            return "guns n roses"
-        case "Stairway to Heaven":
-            return "led zeppelin"
-        case "Smells Like Teen Spirit":
-            return "nirvana"
-        case "Like a Rolling Stone":
-            return "bob dylan"
-        case "What's Going On":
-            return "marvin gaye"
-        case "Good Vibrations":
-            return "beach boys"
-        case "Johnny B. Goode":
-            return "chuck berry"
-        case "Hey Jude":
-            return "beatles"
-        case "Purple Rain":
-            return "prince"
-        case "Born to Run":
-            return "bruce springsteen"
-        case "Respect":
-            return "aretha franklin"
-        default:
-            return "album"
-        }
+    private var albumData: AlbumData {
+        return AlbumDataManager.shared.getAlbumData(for: albumName)
     }
+    
+    private var albumImageName: String { albumData.albumImageName }
+    private var artistImageName: String { albumData.artistImageName }
+    private var artistName: String { albumData.artistName }
+    private var releaseYear: Int { albumData.releaseYear }
+    private var artistBio: String { albumData.artistBio }
 }
 
 // MARK: - Components
@@ -142,13 +92,31 @@ struct Album: View {
 struct AlbumHeader: View {
     let albumName: String?
     let albumImageName: String
+    let artistImageName: String
+    let artistName: String
+    let releaseYear: Int
+    let artistBio: String
     @Binding var isPlaying: Bool
     @Binding var isLiked: Bool
+    @State private var showFullBio = false
+    
+    private var truncatedBio: String {
+        let words = artistBio.components(separatedBy: " ")
+        let maxWordsPerLine = 8 // Approximate words per line
+        let maxWordsForTwoLines = maxWordsPerLine * 2
+        
+        if words.count <= maxWordsForTwoLines {
+            return artistBio
+        }
+        
+        let wordsForTwoLines = Array(words.prefix(maxWordsForTwoLines))
+        return wordsForTwoLines.joined(separator: " ") + "..."
+    }
     
     var body: some View {
         VStack(spacing: 0) {
             // Album cover and title
-            VStack(spacing: 24) {
+            VStack(spacing: 0) {
                 // Square album cover
                 Image(albumImageName)
                     .resizable()
@@ -160,6 +128,7 @@ struct AlbumHeader: View {
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(Color.white.opacity(0.1), lineWidth: 1)
                     )
+                    .padding(.bottom, 16)
                 
                 // Album title
                 Text(albumName ?? "Album")
@@ -168,18 +137,67 @@ struct AlbumHeader: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 16)
-                    .padding(.bottom, 12)
+
+                // Artist info
+                HStack(spacing: 8) {
+                    // Round artist picture
+                    Image(artistImageName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 40, height: 40)
+                        .clipShape(Circle())
+                    
+                    // Artist name and release year
+                    VStack(alignment: .leading) {
+                        Text(artistName)
+                            .font(.Text1)
+                            .foregroundColor(.fill1)
+                        
+                        Text(String(releaseYear))
+                            .font(.Text1)
+                            .foregroundColor(.subtitle)
+                            .kerning(0)
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 12)
             }
             
-            // Action buttons
-            HStack(spacing: 6) {
-                ListenButton(isPlaying: $isPlaying)
-                Spacer()
-                LikeButton(isLiked: $isLiked)
+            // Bio and action buttons container with synchronized animation
+            VStack(spacing: 0) {
+                // Artist bio
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(alignment: .bottom, spacing: 0) {
+                        Text(showFullBio ? artistBio : truncatedBio)
+                            .font(.Text1)
+                            .foregroundColor(.subtitle)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .onTapGesture {
+                                withAnimation(.easeInOut(duration: 0.5)) {
+                                    showFullBio.toggle()
+                                }
+                            }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 12)
+                }
+                
+                // Action buttons
+                HStack(spacing: 6) {
+                    ListenButton(isPlaying: $isPlaying)
+                    Spacer()
+                    LikeButton(isLiked: $isLiked)
+                }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
+            .animation(.easeInOut(duration: 0.5), value: showFullBio)
         }
-        .padding(.top, 120)
+        .padding(.top, 110)
         .padding(.bottom, 24)
     }
 }

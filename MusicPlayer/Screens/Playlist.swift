@@ -30,6 +30,12 @@ struct Playlist: View {
                 )
                 Spacer()
             }
+            
+            // Fixed bottom bar that stays in place during navigation
+            VStack {
+                Spacer()
+                BottomBar()
+            }
         }
         #if os(iOS)
         .navigationBarHidden(true)
@@ -54,7 +60,8 @@ struct Playlist: View {
                     Image(playlistImageName)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.width)
+                        .frame(maxWidth: .infinity)
+                        .aspectRatio(1, contentMode: .fill)
                         .clipped()
                         .overlay(
                             VStack {
@@ -125,23 +132,7 @@ struct Playlist: View {
     
     
     private var sampleTracks: [Track] {
-        [
-            Track(id: 1, title: "Ramsis Paris", artist: "Wegz", albumCover: "benson"),
-            Track(id: 2, title: "Gada3 W Zeen", artist: "Kan, double Zuksh", albumCover: "love letters"),
-            Track(id: 3, title: "Ramsis Paris", artist: "Sharmoofers, Perrie", albumCover: "blur"),
-            Track(id: 4, title: "El Bint El Helwa", artist: "Amr Diab", albumCover: "cure"),
-            Track(id: 5, title: "Habibi Ya Nour El Ein", artist: "Amr Diab", albumCover: "aquarium"),
-            Track(id: 6, title: "Tamally Maak", artist: "Amr Diab", albumCover: "sonic"),
-            Track(id: 7, title: "Ana Baashaak", artist: "Tamer Hosny", albumCover: "uglymoss"),
-            Track(id: 8, title: "El Donia Helwa", artist: "Tamer Hosny", albumCover: "benson"),
-            Track(id: 9, title: "Ya Ghali", artist: "Mohamed Mounir", albumCover: "love letters"),
-            Track(id: 10, title: "El Bahr Byedhak", artist: "Mohamed Mounir", albumCover: "blur"),
-            Track(id: 11, title: "Salam Aleik", artist: "Fairuz", albumCover: "cure"),
-            Track(id: 12, title: "Kifak Inta", artist: "Fairuz", albumCover: "aquarium"),
-            Track(id: 13, title: "Ya Rayt", artist: "Fairuz", albumCover: "sonic"),
-            Track(id: 14, title: "Nassam Alayna El Hawa", artist: "Fairuz", albumCover: "uglymoss"),
-            Track(id: 15, title: "Aatini El Nay", artist: "Fairuz", albumCover: "benson")
-        ]
+        return TrackDataManager.shared.getSampleTracks()
     }
     
     private var playlistImageName: String {

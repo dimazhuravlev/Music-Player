@@ -11,7 +11,7 @@ struct ReligiousShowcase: View {
                 .ignoresSafeArea()
             
             // Scrollable content
-            ScrollView {
+            ScrollView(showsIndicators: false) {
                 VStack(spacing: 32) {
                     PlaylistCarousel(
                         title: "",

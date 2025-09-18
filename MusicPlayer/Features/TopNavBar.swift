@@ -84,25 +84,25 @@ struct TopNavBar: View {
                 // Dark gradient overlay for better contrast
                 LinearGradient(
                     gradient: Gradient(stops: [
-                        Gradient.Stop(color: .black.opacity(0.9), location: 0.00),
-                        Gradient.Stop(color: .black.opacity(0.85), location: 0.11),
-                        Gradient.Stop(color: .black.opacity(0.81), location: 0.20),
-                        Gradient.Stop(color: .black.opacity(0.75), location: 0.27),
-                        Gradient.Stop(color: .black.opacity(0.7), location: 0.34),
-                        Gradient.Stop(color: .black.opacity(0.65), location: 0.39),
-                        Gradient.Stop(color: .black.opacity(0.59), location: 0.44),
-                        Gradient.Stop(color: .black.opacity(0.53), location: 0.48),
-                        Gradient.Stop(color: .black.opacity(0.47), location: 0.53),
-                        Gradient.Stop(color: .black.opacity(0.41), location: 0.57),
-                        Gradient.Stop(color: .black.opacity(0.35), location: 0.61),
-                        Gradient.Stop(color: .black.opacity(0.28), location: 0.67),
-                        Gradient.Stop(color: .black.opacity(0.21), location: 0.73),
-                        Gradient.Stop(color: .black.opacity(0.14), location: 0.81),
-                        Gradient.Stop(color: .black.opacity(0.07), location: 0.89),
-                        Gradient.Stop(color: .black.opacity(0), location: 1.00),
+                        Gradient.Stop(color: .black.opacity(0), location: 0.00),
+                        Gradient.Stop(color: .black.opacity(0.07), location: 0.11),
+                        Gradient.Stop(color: .black.opacity(0.13), location: 0.21),
+                        Gradient.Stop(color: .black.opacity(0.18), location: 0.28),
+                        Gradient.Stop(color: .black.opacity(0.24), location: 0.34),
+                        Gradient.Stop(color: .black.opacity(0.29), location: 0.39),
+                        Gradient.Stop(color: .black.opacity(0.34), location: 0.44),
+                        Gradient.Stop(color: .black.opacity(0.39), location: 0.48),
+                        Gradient.Stop(color: .black.opacity(0.44), location: 0.51),
+                        Gradient.Stop(color: .black.opacity(0.49), location: 0.55),
+                        Gradient.Stop(color: .black.opacity(0.53), location: 0.59),
+                        Gradient.Stop(color: .black.opacity(0.58), location: 0.65),
+                        Gradient.Stop(color: .black.opacity(0.63), location: 0.71),
+                        Gradient.Stop(color: .black.opacity(0.69), location: 0.79),
+                        Gradient.Stop(color: .black.opacity(0.74), location: 0.88),
+                        Gradient.Stop(color: .black.opacity(0.8), location: 1.00),
                         ],),
-                    startPoint: .top,
-                    endPoint: .bottom
+                    startPoint: .bottom, 
+                    endPoint: .top
                 )
                 .frame(height: 120)
                 .ignoresSafeArea()

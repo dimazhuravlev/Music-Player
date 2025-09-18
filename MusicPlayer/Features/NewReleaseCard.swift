@@ -42,7 +42,7 @@ struct NewReleaseCard: View {
                     .frame(width: 320, height: 150, alignment: .top)
             }
             
-            // Variable blur overlay
+            // Native blur overlay
             VariableBlurView(maxBlurRadius: 28, direction: .blurredBottomClearTop)
                 .frame(width: 320, height: 250)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
