@@ -191,7 +191,9 @@ struct AlbumHeader: View {
                 HStack(spacing: 6) {
                     ListenButton(isPlaying: $isPlaying)
                     Spacer()
-                    LikeButton(isLiked: $isLiked)
+                    LikeButton(isLiked: $isLiked) {
+                        ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: albumImageName)
+                    }
                 }
                 .padding(.horizontal, 16)
             }

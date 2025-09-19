@@ -82,17 +82,17 @@ struct ForYouShowcase: View {
                 }
                 .padding(.bottom, 120)
             }
+            .background(Color.black)
             .simultaneousGesture(
                 DragGesture()
                     .onChanged { value in
                         if value.translation.height > 0 {
-                            withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
-                                refreshOffset = min(value.translation.height * 0.3, 80)
-                            }
+                            // Reduce animation complexity for better performance
+                            refreshOffset = min(value.translation.height * 0.3, 80)
                         }
                     }
                     .onEnded { value in
-                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8, blendDuration: 0.2)) {
+                        withAnimation(.easeOut(duration: 0.3)) {
                             refreshOffset = 0
                         }
                     }

@@ -29,48 +29,30 @@ struct PlaylistCarousel: View {
 struct PlaylistCard: View {
     let imageName: String
     let onTap: () -> Void
-    @State private var cardTapScale: CGFloat = 1.0
-    @State private var cardLongTapScale: CGFloat = 1.0
     
     var body: some View {
-        Image(imageName)
-            .resizable()
-            .scaledToFill()
-            .frame(width: 168, height: 168)
-            .clipped()
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
-            )
-            .scaleEffect(cardTapScale * cardLongTapScale)
-            .animation(.smooth(duration: 0.1), value: cardTapScale)
-            .animation(.smooth(duration: 0.2), value: cardLongTapScale)
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
-                        // Scale down immediately when pressed
-                        cardLongTapScale = 0.95
-                    }
-                    .onEnded { _ in
-                        // Scale back up when released
-                        cardLongTapScale = 1.0
-                    }
-            )
-            .onTapGesture {
-                // Tap animation with completion guarantee
-                withAnimation(.smooth(duration: 0.1)) {
-                    cardTapScale = 0.95
-                }
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    withAnimation(.smooth(duration: 0.1)) {
-                        cardTapScale = 1.0
-                    }
-                }
-                
-                // Call the navigation action
-                onTap()
-            }
+        Button {
+            onTap()
+        } label: {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 168, height: 168)
+                .clipped()
+                .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
+                )
+        }
+        .buttonStyle(PlaylistCardButtonStyle())
+    }
+}
+
+private struct PlaylistCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.smooth(duration: 0.1), value: configuration.isPressed)
     }
 }

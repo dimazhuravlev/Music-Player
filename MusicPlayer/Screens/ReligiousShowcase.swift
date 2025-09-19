@@ -86,6 +86,7 @@ struct ReligiousShowcase: View {
                 .padding(.top, 48)
                 .padding(.bottom, 120)
             }
+            .background(Color.black)
         }
         .navigationDestination(isPresented: $navigateToPlayer) {
             Playlist(playlistName: selectedPlaylist)

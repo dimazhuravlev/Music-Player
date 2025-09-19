@@ -14,76 +14,121 @@ struct NewReleaseCard: View {
     let onLike: () -> Void
     let onPlay: () -> Void
     
-    @State private var cardTapScale: CGFloat = 1.0
-    @State private var cardLongTapScale: CGFloat = 1.0
+    @State private var suppressNavigation = false
     @State private var isLiked: Bool = false
     @State private var isPlaying: Bool = false
     @State private var showHeartExplosion: Bool = false
     @State private var likeButtonPosition: CGPoint = CGPoint(x: 240, y: 360)
     
     var body: some View {
+        Button {
+            if suppressNavigation {
+                suppressNavigation = false
+                return
+            }
+            onTap()
+        } label: {
+            NewReleaseCardContent(
+                albumDescription: albumDescription,
+                artistName: artistName,
+                artistPhoto: artistPhoto,
+                trackThumbnail: trackThumbnail,
+                trackTitle: trackTitle,
+                releaseDate: releaseDate,
+                isLiked: $isLiked,
+                isPlaying: $isPlaying,
+                showHeartExplosion: $showHeartExplosion,
+                likeButtonPosition: $likeButtonPosition,
+                onLike: onLike,
+                onPlay: onPlay,
+                suppressNavigation: $suppressNavigation
+            )
+        }
+        .buttonStyle(NewReleaseCardButtonStyle())
+    }
+}
+
+private struct NewReleaseCardButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .animation(.smooth(duration: 0.1), value: configuration.isPressed)
+            .transaction { transaction in
+                if configuration.isPressed {
+                    transaction.animation = .none
+                }
+            }
+    }
+}
+
+private struct NewReleaseCardContent: View {
+    let albumDescription: String
+    let artistName: String
+    let artistPhoto: String
+    let trackThumbnail: String
+    let trackTitle: String
+    let releaseDate: String
+    @Binding var isLiked: Bool
+    @Binding var isPlaying: Bool
+    @Binding var showHeartExplosion: Bool
+    @Binding var likeButtonPosition: CGPoint
+    let onLike: () -> Void
+    let onPlay: () -> Void
+    @Binding var suppressNavigation: Bool
+    
+    var body: some View {
         ZStack {
             // Background images
             VStack(spacing: 0) {
-                // Original artist photo
                 Image(artistPhoto)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 320, height: 320)
                     .clipped()
                 
-                // Mirrored artist photo
                 Image(artistPhoto)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 320, height: 320)
                     .clipped()
-                    .scaleEffect(x: -1, y: -1) // Mirror horizontally and invert vertically
+                    .scaleEffect(x: -1, y: -1)
                     .frame(width: 320, height: 150, alignment: .top)
             }
             
-            // Native blur overlay
             VariableBlurView(maxBlurRadius: 28, direction: .blurredBottomClearTop)
                 .frame(width: 320, height: 250)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
             
-            // Content
             VStack(spacing: 0) {
-                    // label, artist name and bio
-                    VStack(alignment: .leading, spacing: 0) {
-                        Spacer()
-                        
-                        Text("New Album")
+                VStack(alignment: .leading, spacing: 0) {
+                    Spacer()
+                    
+                    Text("New Album")
                         .font(.Text1)
                         .foregroundColor(.subtitle)
-                        
-                        Text(artistName)
-                            .font(.Headline3)
-                            .foregroundColor(.fill1)
-                            .lineLimit(1)
-                        
-                        Text(albumDescription)
-                            .font(.Text1)
-                            .lineSpacing(2)
-                            .foregroundColor(.subtitle)
-                            .lineLimit(3)
-                            .multilineTextAlignment(.leading)
-                            .padding(.top, 4)
-                        
-                        // Horizontal divider
-                        Rectangle()
-                            .fill(Color.white.opacity(0.15))
-                            .frame(height: 0.5)
-                            .padding(.top, 12)
-                    }
-                    .padding(.horizontal, 16)
-                    // .padding(.bottom, 16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    
+                    Text(artistName)
+                        .font(.Headline3)
+                        .foregroundColor(.fill1)
+                        .lineLimit(1)
+                    
+                    Text(albumDescription)
+                        .font(.Text1)
+                        .lineSpacing(2)
+                        .foregroundColor(.subtitle)
+                        .lineLimit(3)
+                        .multilineTextAlignment(.leading)
+                        .padding(.top, 4)
+                    
+                    Rectangle()
+                        .fill(Color.white.opacity(0.15))
+                        .frame(height: 0.5)
+                        .padding(.top, 12)
+                }
+                .padding(.horizontal, 16)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
-                
-                // Album section
                 HStack(spacing: 12) {
-                    // Album cover
                     Image(trackThumbnail)
                         .resizable()
                         .scaledToFill()
@@ -91,7 +136,6 @@ struct NewReleaseCard: View {
                         .clipped()
                         .cornerRadius(6)
                     
-                    // Album info
                     VStack(alignment: .leading, spacing: 2) {
                         Text(trackTitle)
                             .font(.Text1)
@@ -106,34 +150,21 @@ struct NewReleaseCard: View {
                     
                     Spacer()
                     
-                    // Action buttons
                     HStack(spacing: 12) {
-                        // Like button
                         AnimatedIconButton(
                             icon1: "like-default",
                             icon2: "like-active",
                             isActive: isLiked,
                             iconSize: 20
                         ) {
-                            withAnimation(.smooth(duration: 0.2)) {
-                                isLiked.toggle()
-                            }
-                            
-                            // Trigger heart explosion when liking
-                            if isLiked {
-                                showHeartExplosion = true
-                            }
-                            
-                            onLike()
+                            handleLikeTap()
                         }
+                        .modifier(SuppressNavigationModifier(isActive: $suppressNavigation))
                         
-                        // Play button
                         PlayPauseButton(isPlaying: isPlaying, size: 40) {
-                            withAnimation(.smooth(duration: 0.2)) {
-                                isPlaying.toggle()
-                            }
-                            onPlay()
+                            handlePlayTap()
                         }
+                        .modifier(SuppressNavigationModifier(isActive: $suppressNavigation))
                     }
                 }
                 .padding(.top, 16)
@@ -146,46 +177,64 @@ struct NewReleaseCard: View {
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-            .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
+                .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
         )
-        .scaleEffect(cardTapScale * cardLongTapScale)
-        .animation(.smooth(duration: 0.1), value: cardTapScale)
-        .animation(.smooth(duration: 0.2), value: cardLongTapScale)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    cardLongTapScale = 0.98
+        .overlay(
+            Group {
+                if showHeartExplosion {
+                    HeartExplosionView(centerPosition: likeButtonPosition)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                showHeartExplosion = false
+                            }
+                        }
                 }
-                .onEnded { _ in
-                    cardLongTapScale = 1.0
-                }
+            }
         )
-                .onTapGesture {
-                    withAnimation(.smooth(duration: 0.1)) {
-                        cardTapScale = 0.98
-                    }
+    }
+    
+    private func handleLikeTap() {
+        // Reduce animation complexity for better performance
+        withAnimation(.easeInOut(duration: 0.15)) {
+            isLiked.toggle()
+        }
+        
+        if isLiked {
+            // Delay heart explosion to avoid animation conflicts
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                showHeartExplosion = true
+            }
+            // Show global toast when liked
+            ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: trackThumbnail)
+        }
+        
+        onLike()
+    }
+    
+    private func handlePlayTap() {
+        withAnimation(.easeInOut(duration: 0.15)) {
+            isPlaying.toggle()
+        }
+        onPlay()
+    }
+}
 
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        withAnimation(.smooth(duration: 0.1)) {
-                            cardTapScale = 1.0
+private struct SuppressNavigationModifier: ViewModifier {
+    @Binding var isActive: Bool
+    
+    func body(content: Content) -> some View {
+        content
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: 0)
+                    .onChanged { _ in
+                        isActive = true
+                    }
+                    .onEnded { _ in
+                        DispatchQueue.main.async {
+                            isActive = false
                         }
                     }
-
-                    onTap()
-                }
-                .overlay(
-                    // Heart explosion overlay
-                    Group {
-                        if showHeartExplosion {
-                            HeartExplosionView(centerPosition: likeButtonPosition)
-                                .onAppear {
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                                        showHeartExplosion = false
-                                    }
-                                }
-                        }
-                    }
-                )
+            )
     }
 }
 

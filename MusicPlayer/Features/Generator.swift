@@ -4,7 +4,7 @@ import AVKit
 struct VideoBackgroundView: View {
     let refreshOffset: CGFloat
     @State private var player: AVPlayer?
-    @State private var doubledPlayer: AVPlayer?
+    @State private var isVisible: Bool = true
     
     var body: some View {
         ZStack {
@@ -12,8 +12,8 @@ struct VideoBackgroundView: View {
             Color.black
                 .ignoresSafeArea()
             
-            // Video player
-            if let player = player {
+            // Video player - only show when visible and reduce resource usage
+            if let player = player, isVisible {
                 VideoPlayer(player: player)
                     .aspectRatio(1, contentMode: .fill)
                     .frame(width: 300, height: 300)
@@ -21,38 +21,55 @@ struct VideoBackgroundView: View {
                     .offset(y: -120 - refreshOffset)
                     .ignoresSafeArea()
                     .onAppear {
-                        player.play()
+                        // Delay video start to reduce initial load
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            player.play()
+                        }
+                    }
+                    .onDisappear {
+                        player.pause()
                     }
             }
         }
         .onAppear {
             setupVideo()
+            isVisible = true
+        }
+        .onDisappear {
+            isVisible = false
+            player?.pause()
         }
     }
     
     private func setupVideo() {
-        guard let asset = NSDataAsset(name: "Shader") else { return }
-        
-        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Shader.mov")
-        
-        do {
-            try asset.data.write(to: tempURL)
-            let newPlayer = AVPlayer(url: tempURL)
-            newPlayer.actionAtItemEnd = .none
+        // Perform video setup on background queue to avoid blocking UI
+        Task.detached(priority: .background) {
+            guard let asset = NSDataAsset(name: "Shader") else { return }
             
-            // Set up looping
-            NotificationCenter.default.addObserver(
-                forName: .AVPlayerItemDidPlayToEndTime,
-                object: newPlayer.currentItem,
-                queue: .main
-            ) { _ in
-                newPlayer.seek(to: .zero)
-                newPlayer.play()
+            let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("Shader.mov")
+            
+            do {
+                try asset.data.write(to: tempURL)
+                
+                await MainActor.run {
+                    let newPlayer = AVPlayer(url: tempURL)
+                    newPlayer.actionAtItemEnd = .none
+                    
+                    // Set up looping
+                    NotificationCenter.default.addObserver(
+                        forName: .AVPlayerItemDidPlayToEndTime,
+                        object: newPlayer.currentItem,
+                        queue: .main
+                    ) { _ in
+                        newPlayer.seek(to: .zero)
+                        newPlayer.play()
+                    }
+                    
+                    self.player = newPlayer
+                }
+            } catch {
+                // Silently fail - fallback to black background
             }
-            
-            self.player = newPlayer
-        } catch {
-            // Silently fail - fallback to black background
         }
     }
 }

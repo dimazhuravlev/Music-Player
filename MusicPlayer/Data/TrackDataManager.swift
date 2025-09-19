@@ -4,9 +4,16 @@ import Foundation
 class TrackDataManager {
     static let shared = TrackDataManager()
     
+    // Cache tracks to avoid recreating them every time
+    private lazy var cachedTracks: [Track] = generateSampleTracks()
+    
     private init() {}
     
     func getSampleTracks() -> [Track] {
+        return cachedTracks
+    }
+    
+    private func generateSampleTracks() -> [Track] {
         return [
             Track(id: 1, title: "Taste", artist: "Uglymoss", albumCover: "blur", releaseYear: 2023),
             Track(id: 2, title: "Blueprint", artist: "Uglymoss", albumCover: "benson", releaseYear: 2024),

@@ -1,3 +1,6 @@
+#if canImport(UIKit)
+import UIKit
+#endif
 import SwiftUI
 
 @main
@@ -5,6 +8,9 @@ struct MusicApp: App {
     init() {
         // Register custom fonts on app launch
         FontManager.shared.registerFonts()
+#if canImport(UIKit)
+        UIWindow.appearance().backgroundColor = UIColor.black
+#endif
     }
     
     var body: some Scene {
@@ -15,10 +21,20 @@ struct MusicApp: App {
 }
 
 struct AppRootView: View {
+    @StateObject private var toastManager = ToastManager.shared
     var body: some View {
-        NavigationStack {
-            MainContentView()
+        ZStack {
+            Color.black
+                .ignoresSafeArea()
+            
+            NavigationStack {
+                MainContentView()
+                    .background(Color.black)
+                    .statusBar(hidden: false)
+            }
+            .preferredColorScheme(.dark)
         }
+        .toast(isPresented: $toastManager.isPresented, config: toastManager.currentConfig)
     }
 }
 
@@ -38,7 +54,7 @@ struct MainContentView: View {
             Color.black
                 .ignoresSafeArea()
             
-            // Showcase content with sequential fade and zoom animation
+            // Showcase content with sequential fade and slight blur
             Group {
                 switch pendingTab {
                 case 0:
@@ -64,13 +80,13 @@ struct MainContentView: View {
                 // Only animate if actually changing tabs
                 guard oldValue != newValue else { return }
                 
-                // Phase 1: Fade out current showcase (300ms)
+                // Phase 1: Fade out current showcase (0.3s)
                 isTransitioning = true
                 
-                // Phase 2: After fade out completes, switch content and fade in new showcase (300ms)
+                // Phase 2: After fade out completes, switch content and fade in new showcase
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    previousTab = pendingTab
                     pendingTab = newValue
-                    // Start with opacity 0 for the new showcase
                     isTransitioning = true
                     
                     // Then fade in the new showcase

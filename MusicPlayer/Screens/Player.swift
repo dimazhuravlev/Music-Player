@@ -178,6 +178,7 @@ struct Player: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     showHeartExplosion = false
                 }
+                ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: "album")
             }
         }
     }

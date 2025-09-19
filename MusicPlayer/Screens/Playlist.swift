@@ -108,7 +108,9 @@ struct Playlist: View {
                         HStack(spacing: 6) {
                             ListenButton(isPlaying: $isPlaying)
                             Spacer()
-                            LikeButton(isLiked: $isLiked)
+                            LikeButton(isLiked: $isLiked) {
+                                ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: playlistImageName)
+                            }
                         }
                         .padding(.horizontal, 16)
                         
@@ -194,7 +196,9 @@ struct ArtistHeader: View {
             HStack(spacing: 6) {
                 ListenButton(isPlaying: $isPlaying)
                 Spacer()
-                LikeButton(isLiked: $isLiked)
+                LikeButton(isLiked: $isLiked) {
+                    ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: playlistImageName)
+                }
             }
             
             FilterCarousel(selectedFilter: $selectedFilter)
@@ -233,9 +237,13 @@ struct ListenButton: View {
 
 struct LikeButton: View {
     @Binding var isLiked: Bool
+    var onLike: (() -> Void)? = nil
     
     var body: some View {
-        Button(action: { isLiked.toggle() }) {
+        Button(action: {
+            isLiked.toggle()
+            if isLiked { onLike?() }
+        }) {
             AnimatedIconButton(
                 icon1: "like-default",
                 icon2: "like-active",
@@ -243,6 +251,7 @@ struct LikeButton: View {
                 iconSize: 20
             ) {
                 isLiked.toggle()
+                if isLiked { onLike?() }
             }
             .frame(width: 40, height: 40)
             .background(Color.white.opacity(0.1))

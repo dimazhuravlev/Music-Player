@@ -146,6 +146,7 @@ struct TrendsShowcase: View {
                 .padding(.top, 72)
                 .padding(.bottom, 120)
             }
+            .background(Color.black)
         }
         .navigationDestination(isPresented: $navigateToPlayer) {
             Playlist(playlistName: selectedPlaylist)
