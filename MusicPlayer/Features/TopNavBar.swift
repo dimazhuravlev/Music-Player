@@ -1,9 +1,12 @@
 import SwiftUI
 import VariableBlur
+import CoreHaptics
 
 struct TopNavBar: View {
     @Binding var selectedTab: Int
     @State private var pressedTabIndex: Int? = nil
+    @State private var hapticEngine: CHHapticEngine?
+    @State private var previousSelectedTab: Int = 0
     
     let tabs = ["For You", "Trends", "Religious"]
     
@@ -22,6 +25,10 @@ struct TopNavBar: View {
                         .animation(.smooth(duration: 0.1), value: pressedTabIndex)
                         .onTapGesture {
                             selectedTab = index
+                            if index != previousSelectedTab {
+                                playTabSwitchHaptic()
+                            }
+                            previousSelectedTab = index
                         }
                         .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { pressing in
                             pressedTabIndex = pressing ? index : nil
@@ -58,9 +65,7 @@ struct TopNavBar: View {
             Spacer()
             
             // User profile picture
-            Button(action: {
-                // Handle profile tap
-            }) {
+            NavigationLink(destination: Wizard()) {
                 Image("userpic")
                     .resizable()
                     .scaledToFill()
@@ -107,6 +112,57 @@ struct TopNavBar: View {
                 .frame(height: 120)
                 .ignoresSafeArea()
             }
+        }
+        .onAppear {
+            setupHapticEngine()
+        }
+    }
+    
+    private func setupHapticEngine() {
+        do {
+            hapticEngine = try CHHapticEngine()
+            try hapticEngine?.start()
+            
+            // Handle engine stopping
+            hapticEngine?.stoppedHandler = { [weak hapticEngine] reason in
+                if reason == .audioSessionInterrupt || reason == .applicationSuspended {
+                    do {
+                        try hapticEngine?.start()
+                    } catch {
+                        print("Failed to restart haptic engine: \(error)")
+                    }
+                }
+            }
+        } catch {
+            print("Failed to create haptic engine: \(error)")
+        }
+    }
+    
+    private func playTabSwitchHaptic() {
+        guard let engine = hapticEngine else { return }
+        
+        do {
+            let parameters = [
+                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.40),
+                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.30),
+                CHHapticEventParameter(parameterID: .attackTime, value: 0.50),
+                CHHapticEventParameter(parameterID: .decayTime, value: 0.30),
+                CHHapticEventParameter(parameterID: .releaseTime, value: 0.60),
+                CHHapticEventParameter(parameterID: .sustained, value: 1)
+            ]
+            
+            let event = CHHapticEvent(
+                eventType: .hapticContinuous,
+                parameters: parameters,
+                relativeTime: 0,
+                duration: 0.40
+            )
+            
+            let pattern = try CHHapticPattern(events: [event], parameters: [])
+            let player = try engine.makePlayer(with: pattern)
+            try player.start(atTime: 0)
+        } catch {
+            print("Failed to play haptic: \(error)")
         }
     }
 }

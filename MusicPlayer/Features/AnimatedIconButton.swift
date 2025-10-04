@@ -48,6 +48,13 @@ struct AnimatedIconButton: View {
                 .animation(.spring(response: 0.3, dampingFraction: 0.6, blendDuration: 0.5), value: iconOpacity)
         }
         .onTapGesture {
+            // Add haptic feedback for play/pause and like buttons
+            if (icon1 == "play" && icon2 == "pause") || (icon1 == "pause" && icon2 == "play") ||
+               (icon1 == "like-default" && icon2 == "like-active") {
+                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                impactFeedback.impactOccurred(intensity: 1.0)
+            }
+            
             // Step 1: Fade out and scale down current icon
             iconOpacity = 0
             iconScale = 0.4

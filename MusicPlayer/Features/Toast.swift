@@ -33,7 +33,7 @@ struct ToastView: View {
                     .offset(y: coverOffsetY)
             }
             Text(config.title)
-                .font(.Text2)
+                .font(.Text1)
                 .foregroundColor(.fill1)
                 .multilineTextAlignment(.leading)
                 .lineLimit(2)

@@ -199,7 +199,7 @@ struct AlbumHeader: View {
             }
             .animation(.easeInOut(duration: 0.5), value: showFullBio)
         }
-        .padding(.top, 110)
+        .padding(.top, 120)
         .padding(.bottom, 24)
     }
 }

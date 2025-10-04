@@ -103,20 +103,22 @@ private struct NewReleaseCardContent: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Spacer()
                     
-                    Text("New Album")
-                        .font(.Text1)
-                        .foregroundColor(.subtitle)
-                    
-                    Text(artistName)
-                        .font(.Headline3)
-                        .foregroundColor(.fill1)
-                        .lineLimit(1)
+                    VStack(alignment: .leading, spacing: -8) {
+                        Text("New Album Out Now")
+                            .font(.Headline3)
+                            .foregroundColor(.white.opacity(0.4))
+                        
+                        Text(artistName)
+                            .font(.Headline3)
+                            .foregroundColor(.fill1)
+                            .lineLimit(1)
+                    }
                     
                     Text(albumDescription)
                         .font(.Text1)
                         .lineSpacing(2)
                         .foregroundColor(.subtitle)
-                        .lineLimit(3)
+                        .lineLimit(2)
                         .multilineTextAlignment(.leading)
                         .padding(.top, 4)
                     

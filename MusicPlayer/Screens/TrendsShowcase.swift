@@ -9,20 +9,20 @@ struct TrendsShowcase: View {
     // New releases data
     private let newReleases: [NewReleaseData] = [
         NewReleaseData(
-            albumCover: "benson",
+            albumCover: "benson boone",
             artistName: "Benson Boone",
             albumDescription: "A soulful journey through modern pop with heartfelt lyrics and captivating melodies that resonate with listeners across all generations and musical preferences",
-            trackThumbnail: "benson",
+            trackThumbnail: "benson boone",
             trackTitle: "Beautiful Things",
             trackSubtitle: "Beautiful Things",
             releaseDate: "15 Jul 2025",
             artistPhoto: "teddy swims"
         ),
         NewReleaseData(
-            albumCover: "love letters",
+            albumCover: "saint levant",
             artistName: "Saint Levant",
             albumDescription: "He knows love isn't just emotion — it's politics, heritage, and resistance; this bilingual confessional blends spoken-word poetry with contemporary beats to create a powerful narrative of cultural identity and personal growth",
-            trackThumbnail: "love letters",
+            trackThumbnail: "saint levant",
             trackTitle: "Love Letters / رسائل حب",
             trackSubtitle: "Love Letters",
             releaseDate: "29 Jun 2025",
@@ -56,7 +56,7 @@ struct TrendsShowcase: View {
             trackTitle: "Equinox",
             trackSubtitle: "Equinox",
             releaseDate: "05 Aug 2025",
-            artistPhoto: "wegz"
+            artistPhoto: "Wegz 3"
         )
     ]
     

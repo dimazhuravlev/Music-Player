@@ -44,6 +44,10 @@ struct PlayPauseButton: View {
                 // Scale down background
                 backgroundScale = 0.8
                 
+                // Add haptic feedback
+                let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                impactFeedback.impactOccurred(intensity: 1.0)
+                
                 // Trigger the main action
                 onTap()
                 

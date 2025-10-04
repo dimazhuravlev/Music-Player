@@ -67,7 +67,7 @@ struct BottomBar: View {
             }
             .padding(.leading, 16)
             .padding(.trailing, 32)
-            .padding(.bottom, 24)
+            .padding(.bottom, 40)
         }
         .background (alignment: .bottom) {
             ZStack {
