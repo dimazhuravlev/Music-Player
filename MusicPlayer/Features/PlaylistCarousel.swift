@@ -7,10 +7,18 @@ struct PlaylistCarousel: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.Headline5)
-                .foregroundColor(.fill1)
-                .padding(.horizontal, 16)
+            HStack(spacing: 4) {
+                Text(title)
+                    .font(.Headline5)
+                    .foregroundColor(.fill1)
+                
+                Image("shevron")
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundColor(.subtitle)
+                    .frame(width: 20, height: 20)
+            }
+            .padding(.horizontal, 16)
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {

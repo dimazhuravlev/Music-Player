@@ -35,7 +35,10 @@ struct NavBar: View {
     
     let showBackButton: Bool
     let showSearchButton: Bool
+    let showSkipButton: Bool
+    let showBackground: Bool
     let onSearchTap: (() -> Void)?
+    let onSkipTap: (() -> Void)?
     let contentName: String?
     let contentImageName: String?
     let scrollOffset: CGFloat
@@ -43,14 +46,20 @@ struct NavBar: View {
     init(
         showBackButton: Bool = true,
         showSearchButton: Bool = true,
+        showSkipButton: Bool = false,
+        showBackground: Bool = true,
         onSearchTap: (() -> Void)? = nil,
+        onSkipTap: (() -> Void)? = nil,
         contentName: String? = nil,
         contentImageName: String? = nil,
         scrollOffset: CGFloat = 0
     ) {
         self.showBackButton = showBackButton
         self.showSearchButton = showSearchButton
+        self.showSkipButton = showSkipButton
+        self.showBackground = showBackground
         self.onSearchTap = onSearchTap
+        self.onSkipTap = onSkipTap
         self.contentName = contentName
         self.contentImageName = contentImageName
         self.scrollOffset = scrollOffset
@@ -91,42 +100,48 @@ struct NavBar: View {
             
             Spacer()
             
-            SearchButton(onTap: onSearchTap)
+            if showSearchButton {
+                SearchButton(onTap: onSearchTap)
+            } else if showSkipButton {
+                SkipButton(onTap: onSkipTap)
+            }
         }
         .padding(.horizontal, 12)
         .padding(.top, 0)
         .padding(.bottom, 8)
         .background {
-            ZStack {
-                VariableBlurView(maxBlurRadius: 16, direction: .blurredTopClearBottom)
-                    .frame(height: 105)
+            if showBackground {
+                ZStack {
+                    VariableBlurView(maxBlurRadius: 16, direction: .blurredTopClearBottom)
+                        .frame(height: 105)
+                        .ignoresSafeArea()
+                    
+                    // Dark gradient overlay for better contrast
+                    LinearGradient(
+                        gradient: Gradient(stops: [
+                            Gradient.Stop(color: .black.opacity(0), location: 0.00),
+                            Gradient.Stop(color: .black.opacity(0.07), location: 0.11),
+                            Gradient.Stop(color: .black.opacity(0.13), location: 0.21),
+                            Gradient.Stop(color: .black.opacity(0.18), location: 0.28),
+                            Gradient.Stop(color: .black.opacity(0.24), location: 0.34),
+                            Gradient.Stop(color: .black.opacity(0.29), location: 0.39),
+                            Gradient.Stop(color: .black.opacity(0.34), location: 0.44),
+                            Gradient.Stop(color: .black.opacity(0.39), location: 0.48),
+                            Gradient.Stop(color: .black.opacity(0.44), location: 0.51),
+                            Gradient.Stop(color: .black.opacity(0.49), location: 0.55),
+                            Gradient.Stop(color: .black.opacity(0.53), location: 0.59),
+                            Gradient.Stop(color: .black.opacity(0.58), location: 0.65),
+                            Gradient.Stop(color: .black.opacity(0.63), location: 0.71),
+                            Gradient.Stop(color: .black.opacity(0.69), location: 0.79),
+                            Gradient.Stop(color: .black.opacity(0.74), location: 0.88),
+                            Gradient.Stop(color: .black.opacity(0.8), location: 1.00),
+                            ],),
+                        startPoint: .bottom,
+                        endPoint: .top
+                    )
+                    .frame(height: 120)
                     .ignoresSafeArea()
-                
-                // Dark gradient overlay for better contrast
-                LinearGradient(
-                    gradient: Gradient(stops: [
-                        Gradient.Stop(color: .black.opacity(0), location: 0.00),
-                        Gradient.Stop(color: .black.opacity(0.07), location: 0.11),
-                        Gradient.Stop(color: .black.opacity(0.13), location: 0.21),
-                        Gradient.Stop(color: .black.opacity(0.18), location: 0.28),
-                        Gradient.Stop(color: .black.opacity(0.24), location: 0.34),
-                        Gradient.Stop(color: .black.opacity(0.29), location: 0.39),
-                        Gradient.Stop(color: .black.opacity(0.34), location: 0.44),
-                        Gradient.Stop(color: .black.opacity(0.39), location: 0.48),
-                        Gradient.Stop(color: .black.opacity(0.44), location: 0.51),
-                        Gradient.Stop(color: .black.opacity(0.49), location: 0.55),
-                        Gradient.Stop(color: .black.opacity(0.53), location: 0.59),
-                        Gradient.Stop(color: .black.opacity(0.58), location: 0.65),
-                        Gradient.Stop(color: .black.opacity(0.63), location: 0.71),
-                        Gradient.Stop(color: .black.opacity(0.69), location: 0.79),
-                        Gradient.Stop(color: .black.opacity(0.74), location: 0.88),
-                        Gradient.Stop(color: .black.opacity(0.8), location: 1.00),
-                        ],),
-                    startPoint: .bottom,
-                    endPoint: .top
-                )
-                .frame(height: 120)
-                .ignoresSafeArea()
+                }
             }
         }
     }
@@ -170,6 +185,30 @@ struct SearchButton: View {
                     .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
                 )
                 .clipShape(Circle())
+        }
+    }
+}
+
+struct SkipButton: View {
+    let onTap: (() -> Void)?
+    
+    init(onTap: (() -> Void)? = nil) {
+        self.onTap = onTap
+    }
+    
+    var body: some View {
+        Button(action: { onTap?() }) {
+            Text("Skip")
+                .font(.Text1)
+                .foregroundColor(.fill1)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .background(.ultraThinMaterial.opacity(0.5))
+                .overlay(
+                    Capsule()
+                    .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
+                )
+                .clipShape(Capsule())
         }
     }
 }

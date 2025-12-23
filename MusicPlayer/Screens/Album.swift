@@ -6,6 +6,7 @@ struct Album: View {
     @State private var isPlaying = false
     @State private var isLiked = false
     @State private var scrollOffset: CGFloat = 0
+    @EnvironmentObject private var collectionState: CollectionState
     
     init(albumName: String? = nil) {
         self.albumName = albumName
@@ -63,7 +64,7 @@ struct Album: View {
                     isLiked: $isLiked
                 )
                 
-                AlbumTrackList(tracks: albumTracks, albumImageName: albumImageName)
+                TrackListView(tracks: albumTracks, title: "Album Tracks")
                 Spacer(minLength: 120)
             }
         }
@@ -99,6 +100,8 @@ struct AlbumHeader: View {
     @Binding var isPlaying: Bool
     @Binding var isLiked: Bool
     @State private var showFullBio = false
+    @StateObject private var gyro = GyroManager()
+    @EnvironmentObject private var collectionState: CollectionState
     
     private var truncatedBio: String {
         let words = artistBio.components(separatedBy: " ")
@@ -117,17 +120,20 @@ struct AlbumHeader: View {
         VStack(spacing: 0) {
             // Album cover and title
             VStack(spacing: 0) {
-                // Square album cover
+                // Square album cover with gyroscope 3D effect
                 Image(albumImageName)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 280, height: 280)
-                    .cornerRadius(16)
-                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(Color.white.opacity(0.1), lineWidth: 1)
                     )
+                    .rotation3DEffect(.degrees(gyro.pitch * 10), axis: (x: 1, y: 0, z: 0))
+                    .rotation3DEffect(.degrees(gyro.roll * 10), axis: (x: 0, y: 1, z: 0))
+                    .animation(.easeOut(duration: 0.2), value: gyro.pitch)
+                    .animation(.easeOut(duration: 0.2), value: gyro.roll)
                     .padding(.bottom, 16)
                 
                 // Album title
@@ -193,6 +199,7 @@ struct AlbumHeader: View {
                     Spacer()
                     LikeButton(isLiked: $isLiked) {
                         ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: albumImageName)
+                        collectionState.registerLike(coverName: albumImageName)
                     }
                 }
                 .padding(.horizontal, 16)
@@ -204,30 +211,12 @@ struct AlbumHeader: View {
     }
 }
 
-struct AlbumTrackList: View {
-    let tracks: [Track]
-    let albumImageName: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Album Tracks")
-                .font(.Headline5)
-                .foregroundColor(.fill1)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-            
-            VStack(spacing: 0) {
-                ForEach(tracks, id: \.id) { track in
-                    TrackRow(track: track)
-                }
-            }
-        }
-    }
-}
 
 
 #Preview {
     NavigationStack {
         Album(albumName: "Beautiful Things")
+            .environmentObject(NowPlayingState())
+            .environmentObject(CollectionState())
     }
 }

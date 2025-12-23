@@ -6,12 +6,12 @@ extension Font {
         return Font.custom(name, size: size)
     }
     
-    // Custom font variants using YangoGroupHeadline-Bold
-    static var Headline1: Font { Font.custom("YangoGroupHeadline-Bold", size: 48) }
-    static var Headline2: Font { Font.custom("YangoGroupHeadline-Bold", size: 40) }
-    static var Headline3: Font { Font.custom("YangoGroupHeadline-Bold", size: 32) }
-    static var Headline4: Font { Font.custom("YangoGroupHeadline-Bold", size: 28) }
-    static var Headline5: Font { Font.custom("YangoGroupHeadline-Bold", size: 24) }
+    // Custom font variants using YangoGroupHeadlineAR-ExtraBold
+    static var Headline1: Font { Font.custom("YangoGroupHeadlineAR-ExtraBold", size: 48) }
+    static var Headline2: Font { Font.custom("YangoGroupHeadlineAR-ExtraBold", size: 40) }
+    static var Headline3: Font { Font.custom("YangoGroupHeadlineAR-ExtraBold", size: 32) }
+    static var Headline4: Font { Font.custom("YangoGroupHeadlineAR-ExtraBold", size: 28) }
+    static var Headline5: Font { Font.custom("YangoGroupHeadlineAR-ExtraBold", size: 24) }
     
     // Custom font variants using YangoText-Medium
     static var Title1: Font { Font.custom("YangoText-Medium", size: 24) }
@@ -23,6 +23,6 @@ extension Font {
 
 // Font family names for easy reference
 struct CustomFontFamily {
-    static let yangoGroupHeadlineBold = "YangoGroupHeadline-Bold"
+    static let yangoGroupHeadlineBold = "YangoGroupHeadlineAR-ExtraBold"
     static let yangoTextMedium = "YangoText-Medium"
 }

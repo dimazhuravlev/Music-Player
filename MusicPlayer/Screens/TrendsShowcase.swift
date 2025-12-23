@@ -5,6 +5,7 @@ struct TrendsShowcase: View {
     @State private var navigateToPlayer = false
     @State private var selectedAlbum: String?
     @State private var navigateToAlbum = false
+    @EnvironmentObject private var collectionState: CollectionState
     
     // New releases data
     private let newReleases: [NewReleaseData] = [
@@ -23,7 +24,7 @@ struct TrendsShowcase: View {
             artistName: "Saint Levant",
             albumDescription: "He knows love isn't just emotion — it's politics, heritage, and resistance; this bilingual confessional blends spoken-word poetry with contemporary beats to create a powerful narrative of cultural identity and personal growth",
             trackThumbnail: "saint levant",
-            trackTitle: "Love Letters / رسائل حب",
+            trackTitle: "رسائلأ غنيةأغنية جديدة حب",
             trackSubtitle: "Love Letters",
             releaseDate: "29 Jun 2025",
             artistPhoto: "benson boone"
@@ -78,8 +79,7 @@ struct TrendsShowcase: View {
                             navigateToAlbum = true
                         },
                         onLike: { release in
-                            // Handle like action
-                            print("Liked release: \(release.artistName)")
+                            collectionState.registerLike(coverName: release.albumCover)
                         },
                         onPlay: { release in
                             // Handle play action - could start playing the track
@@ -159,4 +159,5 @@ struct TrendsShowcase: View {
 
 #Preview {
     TrendsShowcase()
+        .environmentObject(CollectionState())
 }

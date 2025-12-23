@@ -8,10 +8,16 @@ struct ToastCopy {
         "Added to your Favorites",
         "You like it — we saved it",
         "Nice taste! Added to Collection",
+        "Cool pick — tuning your recommendations right now",
         "Into the heart it goes",
         "Ya salam! That’s a vibe",
         "Niiice!",
-        "Yalla, that’s a song"
+        "Yeeah!",
+        "Yes!",
+        "Yeah!",
+        "Mmm… smooth!",
+        "Hell yeah!",
+        "Yalla, that’s a song",
     ]
     
     static func randomLikeTitle() -> String {

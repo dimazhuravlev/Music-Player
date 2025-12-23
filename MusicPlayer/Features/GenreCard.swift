@@ -3,9 +3,11 @@ import SwiftUI
 struct GenreCard: View {
     let index: Int
     let isSelected: Bool
+    let isActive: Bool
     let onTap: () -> Void
     
     @State private var isPressed: Bool = false
+    @EnvironmentObject private var gyroManager: GyroManager
     
     var body: some View {
         GeometryReader { proxy in
@@ -30,7 +32,6 @@ struct GenreCard: View {
                     Text(title)
                         .font(.Headline3)
                         .foregroundStyle(isSelected ? .black : .white)
-                        .lineSpacing(-16)
                     Text(descriptionText)
                         .font(.Text1)
                         .foregroundStyle(isSelected ? Color.black.opacity(0.5) : Color.subtitle)
@@ -40,29 +41,40 @@ struct GenreCard: View {
                 
                 // Bubbles (artist avatars)
                 ZStack {
-                    let placed = placedBubbles(in: size)
+                    let bubbleLayout = BubbleLayout(index: index)
+                    let placed = bubbleLayout.placedBubbles(in: size, bubbles: bubbles)
                     ForEach(0..<placed.count, id: \.self) { i in
                         let item = placed[i]
+                        let parallaxOffset = ParallaxEffect.offset(
+                            roll: gyroManager.roll,
+                            pitch: gyroManager.pitch,
+                            diameter: item.diameter,
+                            isActive: isActive
+                        )
+                        let clampedPosition = ParallaxEffect.clampedPosition(
+                            original: item.center,
+                            offset: parallaxOffset,
+                            diameter: item.diameter,
+                            in: size
+                        )
                         avatar(imageName: item.imageName, diameter: item.diameter)
-                            .position(x: item.center.x, y: item.center.y)
+                            .position(x: clampedPosition.x, y: clampedPosition.y)
+                            .animation(.smooth(duration: 0.25), value: gyroManager.roll)
+                            .animation(.smooth(duration: 0.25), value: gyroManager.pitch)
                     }
                 }
             }
             .scaleEffect(isPressed ? 0.95 : 1.0)
-            .animation(.easeInOut(duration: 0.2), value: isSelected)
-            .animation(.easeInOut(duration: 0.2), value: isPressed)
+            .animation(.smooth(duration: 0.4), value: isSelected)
+            .animation(.smooth(duration: 0.2), value: isPressed)
             .onTapGesture {
                 // Don't allow selection for Artist Selection cards
                 guard genreDefinition.genre != "Artist Selection" else { return }
                 
-                withAnimation(.easeInOut(duration: 0.15)) {
-                    isPressed = true
-                }
+                isPressed = true
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) {
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        isPressed = false
-                    }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isPressed = false
                     onTap()
                 }
             }
@@ -70,26 +82,11 @@ struct GenreCard: View {
     }
 }
 
-// MARK: - Model
-
-private struct BubbleSpec {
-    let imageName: String
-    let x: CGFloat   // relative 0..1
-    let y: CGFloat   // relative 0..1
-    let size: CGFloat // relative to min(width, height)
-}
-
-private struct PlacedBubble {
-    let imageName: String
-    let center: CGPoint
-    let diameter: CGFloat
-}
-
 // MARK: - Content
 
 private extension GenreCard {
     var title: String {
-        genreDefinition.cardTitle
+        return genreDefinition.cardTitle
     }
     
     var descriptionText: String {
@@ -113,52 +110,12 @@ private extension GenreCard {
     }
     
     var artistImageNames: [String] {
-        // All artist assets from Assets.xcassets/artists
-        let all = [
-            "1D8A8975e cropped",
-            "Abd El Basset Hamouda",
-            "Angham",
-            "Bashaar Al Jawad",
-            "Bosnian Rainbows",
-            "Bruno Mars",
-            "Fahad Bin Fasla",
-            "Hosam Habib (1)",
-            "Kadim Al Saher",
-            "Main Yandex Disk",
-            "Main from Yandex Disk",
-            "Mouhamed Mounir",
-            "RIDE",
-            "Rahma Riad",
-            "Rashed",
-            "Rgaheb Alama",
-            "Ruby from Yandex Disk",
-            "Sabrina Carpenter Image",
-            "Saif Nabeel",
-            "Siilawy",
-            "Tamer Hosny",
-            "The Jesus and Mary Chain",
-            "Tul8te",
-            "Weeknd Oct 9 2021",
-            "Wegz 1",
-            "Wegz 2",
-            "benson boone",
-            "clairo",
-            "dua lipa",
-            "fugazi",
-            "marwan pablo",
-            "my bloody valentine",
-            "pixies",
-            "saint levant",
-            "saint levant 1",
-            "sons of kemet",
-            "teddy swims",
-            "tul8et",
-            "Wegz 3"
-        ]
+        // Use artist image names from BubbleLayout
+        let all = BubbleLayout.allArtistImageNames
         
         // Use deterministic random selection based on card index
         var result: [String] = []
-        if all.isEmpty { return result }
+        guard !all.isEmpty else { return result }
         
         // Create a seeded random number generator for this card
         var rng = SeededGenerator(seed: UInt64(index * 1315423911 + 0xD1E5C0DE))
@@ -208,8 +165,8 @@ private extension GenreCard {
             let radians = phase * .pi / 180
             let xOffset = sin(radians) * amplitudeX
             let yOffset = cos(radians * 1.21) * amplitudeY
-            let newX = clamp(base.x + xOffset, min: 0.08, max: 0.92)
-            let newY = clamp(base.y + yOffset, min: 0.32, max: 0.96)
+            let newX = Swift.max(0.08, Swift.min(0.92, base.x + xOffset))
+            let newY = Swift.max(0.32, Swift.min(0.96, base.y + yOffset))
             specs[idx] = BubbleSpec(imageName: base.imageName, x: newX, y: newY, size: base.size)
         }
         return specs
@@ -243,180 +200,4 @@ private extension GenreCard {
             }
         }
     }
-
-    // Compute non-overlapping positions for bubbles, avoiding the title/description area
-    func placedBubbles(in containerSize: CGSize) -> [PlacedBubble] {
-        let margin: CGFloat = 10
-        let minSide = min(containerSize.width, containerSize.height)
-        let specs = bubbles.sorted { $0.size > $1.size }
-        var placed: [PlacedBubble] = []
-        
-        // Reserve top-left area for text
-        let textPadding: CGFloat = 16
-        let textRect = CGRect(
-            origin: CGPoint(x: 0, y: textPadding),
-            size: CGSize(width: containerSize.width,
-                         height: containerSize.height * 0.28)
-        )
-        let minYForBubbles = textRect.maxY + margin
-        
-        var rng = SeededGenerator(seed: UInt64(0xD1E5C0DE ^ UInt64(index &* 1315423911)))
-        
-        for spec in specs {
-            var diameter = max(10, minSide * spec.size)
-            let base = CGPoint(x: spec.x * containerSize.width, y: spec.y * containerSize.height)
-            var center: CGPoint? = nil
-            
-            // Try spiral candidates around the base, reducing size if needed
-            for reduce in 0..<4 {
-                let attemptDiameter = diameter * CGFloat(pow(0.92, Double(reduce)))
-                if let c = findPlacement(base: base,
-                                         diameter: attemptDiameter,
-                                         containerSize: containerSize,
-                                         textRect: textRect,
-                                         placed: placed,
-                                         margin: margin,
-                                         minY: minYForBubbles,
-                                         rng: &rng) {
-                    center = c
-                    diameter = attemptDiameter
-                    break
-                }
-            }
-            
-            // Fallback grid scan if spiral failed (try with progressive size reduction)
-            if center == nil {
-                for reduce in 0..<6 {
-                    let attemptDiameter = diameter * CGFloat(pow(0.9, Double(reduce)))
-                    if let c = fallbackGrid(diameter: attemptDiameter,
-                                            containerSize: containerSize,
-                                            textRect: textRect,
-                                            placed: placed,
-                                            margin: margin,
-                                            minY: minYForBubbles) {
-                        center = c
-                        diameter = attemptDiameter
-                        break
-                    }
-                }
-            }
-            // As a last resort, place very small at bottom-right safe corner
-            if center == nil {
-                let tiny = max(8, minSide * 0.12)
-                let radius = tiny / 2
-                let x = containerSize.width - radius - margin
-                let y = max(minYForBubbles + radius, containerSize.height - radius - margin)
-                if !circleIntersectsRect(center: CGPoint(x: x, y: y), radius: radius + margin, rect: textRect) {
-                    center = CGPoint(x: x, y: y)
-                    diameter = tiny
-                }
-            }
-            
-            if let c = center {
-                placed.append(PlacedBubble(imageName: spec.imageName, center: c, diameter: diameter))
-            }
-        }
-        return placed
-    }
-    
-    func clamp(_ value: CGFloat, min: CGFloat, max: CGFloat) -> CGFloat { Swift.max(min, Swift.min(max, value)) }
-    
-    // Spiral search around a base point with random phase
-    func findPlacement(base: CGPoint,
-                       diameter: CGFloat,
-                       containerSize: CGSize,
-                       textRect: CGRect,
-                       placed: [PlacedBubble],
-                       margin: CGFloat,
-                       minY: CGFloat,
-                       rng: inout SeededGenerator) -> CGPoint? {
-        let radius = diameter / 2
-        let maxR = min(containerSize.width, containerSize.height) * 0.6
-        let phase = Double.random(in: 0..<Double.pi * 2, using: &rng)
-        var t: Double = 0
-        while t < 1.0 {
-            let r = Double(t) * Double(maxR)
-            let a = phase + r * 0.08
-            var x = base.x + CGFloat(cos(a) * r)
-            var y = base.y + CGFloat(sin(a) * r)
-            let minXAllowed = radius + margin
-            let maxXAllowed = containerSize.width - radius - margin
-            if minXAllowed > maxXAllowed { return nil }
-            x = clamp(x, min: minXAllowed, max: maxXAllowed)
-
-            let minYAllowed = max(radius + margin, minY + radius)
-            let maxYAllowed = containerSize.height - radius - margin
-            if minYAllowed > maxYAllowed { return nil }
-            y = clamp(y, min: minYAllowed, max: maxYAllowed)
-            let c = CGPoint(x: x, y: y)
-            if circleIntersectsRect(center: c, radius: radius + margin, rect: textRect) == false,
-               overlapsAny(center: c, radius: radius + margin, placed: placed) == false {
-                return c
-            }
-            t += 0.03
-        }
-        return nil
-    }
-    
-    func overlapsAny(center: CGPoint, radius: CGFloat, placed: [PlacedBubble]) -> Bool {
-        for p in placed {
-            let required = (p.diameter / 2) + radius
-            let dx = p.center.x - center.x
-            let dy = p.center.y - center.y
-            if (dx * dx + dy * dy) < required * required { return true }
-        }
-        return false
-    }
-    
-    // Coarse grid fallback to guarantee a placement
-    func fallbackGrid(diameter: CGFloat,
-                      containerSize: CGSize,
-                      textRect: CGRect,
-                      placed: [PlacedBubble],
-                      margin: CGFloat,
-                      minY: CGFloat) -> CGPoint? {
-        let radius = diameter / 2
-        let cols = 8
-        let rows = 8
-        let stepX = (containerSize.width - 2 * (radius + margin)) / CGFloat(cols - 1)
-        let stepY = (containerSize.height - 2 * (radius + margin)) / CGFloat(rows - 1)
-        let minYAllowed = max(radius + margin, minY + radius)
-        let maxYAllowed = containerSize.height - radius - margin
-        if stepX <= 0 || stepY <= 0 || minYAllowed > maxYAllowed { return nil }
-        for row in 0..<rows {
-            for col in 0..<cols {
-                let x = radius + margin + CGFloat(col) * stepX
-                let y = radius + margin + CGFloat(row) * stepY
-                if y < minYAllowed || y > maxYAllowed { continue }
-                let c = CGPoint(x: x, y: y)
-                if circleIntersectsRect(center: c, radius: radius + margin, rect: textRect) { continue }
-                if overlapsAny(center: c, radius: radius + margin, placed: placed) { continue }
-                return c
-            }
-        }
-        return nil
-    }
-    
-    func circleIntersectsRect(center: CGPoint, radius: CGFloat, rect: CGRect) -> Bool {
-        let closestX = max(rect.minX, min(center.x, rect.maxX))
-        let closestY = max(rect.minY, min(center.y, rect.maxY))
-        let dx = center.x - closestX
-        let dy = center.y - closestY
-        return (dx * dx + dy * dy) <= radius * radius
-    }
 }
-
-// MARK: - Deterministic RNG
-
-private struct SeededGenerator: RandomNumberGenerator {
-    private var state: UInt64
-    init(seed: UInt64) {
-        self.state = seed == 0 ? 0xdeadbeef : seed
-    }
-    mutating func next() -> UInt64 {
-        state = 2862933555777941757 &* state &+ 3037000493
-        return state
-    }
-}
-
-

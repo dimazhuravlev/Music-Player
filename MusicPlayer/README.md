@@ -8,7 +8,7 @@ This SwiftUI music player app has been organized into a clean, modular structure
 ### 📱 Screens/
 Contains the main screen views of the application:
 - **Showcase.swift** - Main home screen with playlist carousels and mini player
-- **Player.swift** - Full-screen music player with controls and animations
+- **Player.swift** - Swipe-based full-screen player experience
 
 ### 🧩 Features/
 Contains reusable UI components and features:
@@ -31,5 +31,5 @@ Contains reusable UI components and features:
 The app follows a standard SwiftUI architecture where:
 1. `MusicApp.swift` serves as the entry point
 2. `Showcase.swift` is the main home screen
-3. `Player.swift` is presented when a track is selected
+3. `Player.swift` provides the swipe-based player experience
 4. All UI components in `Features/` are used across different screens

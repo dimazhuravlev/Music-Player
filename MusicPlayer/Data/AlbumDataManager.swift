@@ -36,14 +36,14 @@ class AlbumDataManager {
         }
         
         let data: [String: AlbumData] = [
-            "Beautiful Things": AlbumData(
+            "Beautiful Things Seamlessly Blends Organic Instrument": AlbumData(
                 albumImageName: "benson boone",
                 artistImageName: "benson boone",
                 artistName: "Benson Boone",
                 releaseYear: 2024,
                 artistBio: "This album rips through the noise to awaken your senses and spark a fire in your restless soul. Beautiful Things captures the essence of modern pop with heartfelt lyrics and soaring melodies that will stay with you long after the music stops. Benson Boone's journey from American Idol contestant to chart-topping artist represents the modern dream of musical success, blending raw talent with contemporary production techniques. His ability to craft emotionally resonant songs that speak to both personal struggles and universal experiences has made him one of the most compelling voices in today's pop landscape. The album showcases his growth as both a songwriter and performer, with each track carefully crafted to tell a story that listeners can connect with on a deeply personal level. Boone's distinctive vocal style, characterized by its emotional depth and technical precision, brings authenticity to every lyric he sings. The production on Beautiful Things seamlessly blends organic instrumentation with modern electronic elements, creating a sound that feels both timeless and cutting-edge. This collection of songs represents not just an album, but a musical journey that invites listeners to explore the complexities of human emotion through the lens of contemporary pop music."
             ),
-            "Love Letters / رسائل حب": AlbumData(
+            "الجمعة أنا في الحب الجمعة أنا في الح حب": AlbumData(
                 albumImageName: "saint levant",
                 artistImageName: "saint levant",
                 artistName: "Saint Levant",
@@ -57,7 +57,7 @@ class AlbumDataManager {
                 releaseYear: 1997,
                 artistBio: "Blur's iconic track that defined the Britpop era. With its raw energy and unforgettable 'woo-hoo' chorus, this song remains one of the most recognizable tracks in alternative rock history. This explosive anthem captured the spirit of 90s Britain, perfectly encapsulating the cultural moment when British music was reclaiming its place on the global stage. Damon Albarn's distinctive vocal delivery, combined with Graham Coxon's aggressive guitar work, created a sound that was both chaotic and controlled, reflecting the contradictions of modern life. The song's simple yet powerful structure, built around a driving rhythm and memorable hook, made it an instant classic that continues to resonate with new generations of listeners. Blur's ability to blend punk energy with pop accessibility helped define the Britpop movement, influencing countless bands that followed. The track's cultural impact extended far beyond music, becoming a symbol of British identity and youth culture during the 1990s. Its inclusion in films, television shows, and sporting events has cemented its place in popular culture, while its raw emotional power continues to move audiences decades after its release. Song 2 represents the perfect marriage of artistic ambition and commercial appeal, proving that great music can be both challenging and universally accessible."
             ),
-            "Friday I'm in Love": AlbumData(
+            "Masters of Gothic Rock Could Create Pure Pop": AlbumData(
                 albumImageName: "cure",
                 artistImageName: "userpic",
                 artistName: "The Cure",
@@ -113,7 +113,7 @@ class AlbumDataManager {
                 releaseYear: 1987,
                 artistBio: "Guns N' Roses' power ballad that combines Slash's iconic guitar riff with Axl Rose's emotional vocals. This song became the band's signature track and a defining moment of 80s rock music. This epic composition represents the pinnacle of 1980s hard rock, showcasing the band's exceptional musicianship and their ability to blend raw energy with melodic sophistication."
             ),
-            "Smells Like Teen Spirit": AlbumData(
+            "Smells Like Teen Spirit Smells Like Teen Spirit": AlbumData(
                 albumImageName: "album",
                 artistImageName: "userpic",
                 artistName: "Nirvana",

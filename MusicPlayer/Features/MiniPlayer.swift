@@ -3,19 +3,23 @@ import CoreHaptics
 
 struct MiniPlayer: View {
     @Binding var isPlaying: Bool
+    let track: Track
     var onTap: (() -> Void)?
     @State private var rotation: Double = 0
     @State private var lastUpdateTime: Date = Date()
     @State private var currentSpeed: Double = 0
     @State private var hapticEngine: CHHapticEngine?
     @State private var previousIsPlaying: Bool = false
+    @State private var displayedCover: String = "album"
+    @State private var coverOpacity: Double = 1
+    @State private var isPressed: Bool = false
     private let targetSpeed: Double = 60 // degrees per second
     
     var body: some View {
         HStack(spacing: 20) {
             // Album art
             TimelineView(.animation) { timeline in
-                Image("album")
+                Image(displayedCover)
                     .resizable()
                     .scaledToFill()
                     .frame(width: 56, height: 56)
@@ -25,6 +29,7 @@ struct MiniPlayer: View {
                         .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
                     )
                     .rotationEffect(.degrees(rotation))
+                    .opacity(coverOpacity)
                     .onChange(of: timeline.date) { _, newTime in
                         let delta = newTime.timeIntervalSince(lastUpdateTime)
                         
@@ -41,6 +46,17 @@ struct MiniPlayer: View {
                             playStartHaptic()
                         }
                         previousIsPlaying = isPlaying
+                    }
+                    .onChange(of: track.id) { _, _ in
+                        withAnimation(.smooth(duration: 0.3)) {
+                            coverOpacity = 0
+                        }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            displayedCover = track.albumCover
+                            withAnimation(.smooth(duration: 0.3)) {
+                                coverOpacity = 1
+                            }
+                        }
                     }
             }
             
@@ -64,11 +80,28 @@ struct MiniPlayer: View {
             RoundedRectangle(cornerRadius: 72)
                 .stroke(Color.white.opacity(0.08), lineWidth: 0.66)
         )
+        .contentShape(RoundedRectangle(cornerRadius: 72))
+        .scaleEffect(isPressed ? 0.95 : 1.0)
+        .animation(.smooth(duration: 0.15), value: isPressed)
         .onTapGesture {
             onTap?()
         }
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    withAnimation(.smooth(duration: 0.12)) {
+                        isPressed = true
+                    }
+                }
+                .onEnded { _ in
+                    withAnimation(.smooth(duration: 0.12)) {
+                        isPressed = false
+                    }
+                }
+        )
         .onAppear {
             setupHapticEngine()
+            displayedCover = track.albumCover
         }
     }
     
@@ -124,7 +157,10 @@ struct MiniPlayer: View {
 #Preview {
     ZStack {
         Color.black.ignoresSafeArea()
-        MiniPlayer(isPlaying: .constant(false)) {
+        MiniPlayer(
+            isPlaying: .constant(false),
+            track: TrackDataManager.shared.getSampleTracks().first ?? Track(id: 0, title: "Track", artist: "Artist", albumCover: "album", releaseYear: 2024)
+        ) {
             print("MiniPlayer tapped!")
         }
     }

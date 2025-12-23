@@ -8,6 +8,7 @@ struct Playlist: View {
     @State private var isLiked = false
     @State private var selectedFilter = "Top"
     @State private var scrollOffset: CGFloat = 0
+    @EnvironmentObject private var collectionState: CollectionState
     
     init(playlistName: String? = nil) {
         self.playlistName = playlistName
@@ -110,6 +111,7 @@ struct Playlist: View {
                             Spacer()
                             LikeButton(isLiked: $isLiked) {
                                 ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: playlistImageName)
+                                collectionState.registerLike(coverName: playlistImageName)
                             }
                         }
                         .padding(.horizontal, 16)
@@ -122,7 +124,7 @@ struct Playlist: View {
                 }
                 
                 // TrackList below the image
-                TrackList(tracks: sampleTracks, playlistImageName: playlistImageName)
+                TrackListView(tracks: sampleTracks, title: "Top Tracks")
                     .offset(y: 100)
                 
                 Spacer(minLength: 120)
@@ -164,6 +166,7 @@ struct ArtistHeader: View {
     @Binding var isLiked: Bool
     @Binding var selectedFilter: String
     let onShare: () -> Void
+    @EnvironmentObject private var collectionState: CollectionState
     
     var body: some View {
         ZStack {
@@ -198,6 +201,7 @@ struct ArtistHeader: View {
                 Spacer()
                 LikeButton(isLiked: $isLiked) {
                     ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: playlistImageName)
+                    collectionState.registerLike(coverName: playlistImageName)
                 }
             }
             
@@ -321,30 +325,12 @@ struct FilterButton: View {
 }
 
 
-struct TrackList: View {
-    let tracks: [Track]
-    let playlistImageName: String
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Text("Top Tracks")
-                .font(.Headline5)
-                .foregroundColor(.fill1)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 8)
-            
-            VStack(spacing: 0) {
-                ForEach(tracks, id: \.id) { track in
-                    TrackRow(track: track)
-                }
-            }
-        }
-    }
-}
 
 
 #Preview {
     NavigationStack {
         Playlist(playlistName: "Anasheed")
+            .environmentObject(NowPlayingState())
+            .environmentObject(CollectionState())
     }
 }

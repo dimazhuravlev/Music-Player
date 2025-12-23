@@ -7,8 +7,9 @@ struct TopNavBar: View {
     @State private var pressedTabIndex: Int? = nil
     @State private var hapticEngine: CHHapticEngine?
     @State private var previousSelectedTab: Int = 0
+    @State private var showWizard = false
     
-    let tabs = ["For You", "Trends", "Religious"]
+    let tabs = ["For You", "Trends", "Spiritual"]
     
     var body: some View {
         HStack {
@@ -18,8 +19,8 @@ struct TopNavBar: View {
                     Text(tab)
                         .font(.Headline3)
                         .foregroundColor(selectedTab == index ? .fill1 : .white.opacity(0.35))
-                        .shadow(color: selectedTab == index ? .clear : .black.opacity(0.5), radius: 2, x: 0, y: 0)
-                        .shadow(color: selectedTab == index ? .clear : .black.opacity(0.2), radius: 4, x: 0, y: 2)
+                        // .shadow(color: selectedTab == index ? .clear : .black.opacity(0.5), radius: 2, x: 0, y: 0)
+                        // .shadow(color: selectedTab == index ? .clear : .black.opacity(0.2), radius: 4, x: 0, y: 2)
                         .animation(.smooth(duration: 0.4), value: selectedTab)
                         .scaleEffect(pressedTabIndex == index ? 0.9 : 1.0)
                         .animation(.smooth(duration: 0.1), value: pressedTabIndex)
@@ -65,7 +66,9 @@ struct TopNavBar: View {
             Spacer()
             
             // User profile picture
-            NavigationLink(destination: Wizard()) {
+            Button(action: {
+                showWizard = true
+            }) {
                 Image("userpic")
                     .resizable()
                     .scaledToFill()
@@ -80,37 +83,45 @@ struct TopNavBar: View {
         .padding(.horizontal, 16)
         .padding(.top, 0)
         .padding(.bottom, 8)
+        .fullScreenCover(isPresented: $showWizard) {
+            Wizard()
+        }
         .background {
             ZStack {
-                VariableBlurView(maxBlurRadius: 16, direction: .blurredTopClearBottom)
-                    .frame(height: 105)
-                    .ignoresSafeArea()
-                
                 // Dark gradient overlay for better contrast
                 LinearGradient(
-                    gradient: Gradient(stops: [
-                        Gradient.Stop(color: .black.opacity(0), location: 0.00),
-                        Gradient.Stop(color: .black.opacity(0.07), location: 0.11),
-                        Gradient.Stop(color: .black.opacity(0.13), location: 0.21),
-                        Gradient.Stop(color: .black.opacity(0.18), location: 0.28),
-                        Gradient.Stop(color: .black.opacity(0.24), location: 0.34),
-                        Gradient.Stop(color: .black.opacity(0.29), location: 0.39),
-                        Gradient.Stop(color: .black.opacity(0.34), location: 0.44),
-                        Gradient.Stop(color: .black.opacity(0.39), location: 0.48),
-                        Gradient.Stop(color: .black.opacity(0.44), location: 0.51),
-                        Gradient.Stop(color: .black.opacity(0.49), location: 0.55),
-                        Gradient.Stop(color: .black.opacity(0.53), location: 0.59),
-                        Gradient.Stop(color: .black.opacity(0.58), location: 0.65),
-                        Gradient.Stop(color: .black.opacity(0.63), location: 0.71),
-                        Gradient.Stop(color: .black.opacity(0.69), location: 0.79),
-                        Gradient.Stop(color: .black.opacity(0.74), location: 0.88),
-                        Gradient.Stop(color: .black.opacity(0.8), location: 1.00),
-                        ],),
-                    startPoint: .bottom, 
-                    endPoint: .top
+                    gradient: Gradient(
+                        stops: [
+                            Gradient.Stop(color: .black.opacity(0.75), location: 0.00),
+                            Gradient.Stop(color: .black.opacity(0.72), location: 0.11),
+                            Gradient.Stop(color: .black.opacity(0.69), location: 0.21),
+                            Gradient.Stop(color: .black.opacity(0.65), location: 0.28),
+                            Gradient.Stop(color: .black.opacity(0.61), location: 0.34),
+                            Gradient.Stop(color: .black.opacity(0.56), location: 0.40),
+                            Gradient.Stop(color: .black.opacity(0.52), location: 0.44),
+                            Gradient.Stop(color: .black.opacity(0.46), location: 0.48),
+                            Gradient.Stop(color: .black.opacity(0.41), location: 0.52),
+                            Gradient.Stop(color: .black.opacity(0.35), location: 0.56),
+                            Gradient.Stop(color: .black.opacity(0.3), location: 0.60),
+                            Gradient.Stop(color: .black.opacity(0.24), location: 0.66),
+                            Gradient.Stop(color: .black.opacity(0.18), location: 0.72),
+                            Gradient.Stop(color: .black.opacity(0.12), location: 0.79),
+                            Gradient.Stop(color: .black.opacity(0.05), location: 0.89),
+                            Gradient.Stop(color: .black.opacity(0), location: 1.00),
+                            ]),
+                    startPoint: .top, 
+                    endPoint: .bottom
                 )
-                .frame(height: 120)
+                .frame(height: 130, alignment: .top)
                 .ignoresSafeArea()
+                
+                VariableBlurView(maxBlurRadius: 4, direction: .blurredTopClearBottom)
+                    .frame(height: 140, alignment: .top)
+                    .ignoresSafeArea()
+                
+                VariableBlurView(maxBlurRadius: 14, direction: .blurredTopClearBottom)
+                    .frame(height: 100, alignment: .top)
+                    .ignoresSafeArea()
             }
         }
         .onAppear {
@@ -155,7 +166,7 @@ struct TopNavBar: View {
                 eventType: .hapticContinuous,
                 parameters: parameters,
                 relativeTime: 0,
-                duration: 0.40
+                duration: 0.30
             )
             
             let pattern = try CHHapticPattern(events: [event], parameters: [])

@@ -9,7 +9,7 @@ struct NewReleaseCard: View {
     let trackTitle: String
     let trackSubtitle: String
     let releaseDate: String
-    let artistPhoto: String // New parameter for artist background photo
+    let artistPhoto: String
     let onTap: () -> Void
     let onLike: () -> Void
     let onPlay: () -> Void
@@ -22,6 +22,7 @@ struct NewReleaseCard: View {
     
     var body: some View {
         Button {
+            // Prevent navigation when user taps internal controls (like/play buttons)
             if suppressNavigation {
                 suppressNavigation = false
                 return
@@ -48,6 +49,7 @@ struct NewReleaseCard: View {
     }
 }
 
+// Custom button style with subtle scale animation on press
 private struct NewReleaseCardButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -77,124 +79,137 @@ private struct NewReleaseCardContent: View {
     @Binding var suppressNavigation: Bool
     
     var body: some View {
-        ZStack {
-            // Background images
-            VStack(spacing: 0) {
-                Image(artistPhoto)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 320, height: 320)
-                    .clipped()
-                
-                Image(artistPhoto)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 320, height: 320)
-                    .clipped()
-                    .scaleEffect(x: -1, y: -1)
-                    .frame(width: 320, height: 150, alignment: .top)
-            }
+        GeometryReader { geometry in
+            let cardWidth = geometry.size.width
+            let cardHeight = geometry.size.height
+            let backgroundImageSize = cardWidth
+            let bottomBackgroundHeight = cardWidth * 0.46875
+            let blurHeight = cardWidth * 0.78
             
-            VariableBlurView(maxBlurRadius: 28, direction: .blurredBottomClearTop)
-                .frame(width: 320, height: 250)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-            
-            VStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 0) {
-                    Spacer()
-                    
-                    VStack(alignment: .leading, spacing: -8) {
-                        Text("New Album Out Now")
-                            .font(.Headline3)
-                            .foregroundColor(.white.opacity(0.4))
-                        
-                        Text(artistName)
-                            .font(.Headline3)
-                            .foregroundColor(.fill1)
-                            .lineLimit(1)
-                    }
-                    
-                    Text(albumDescription)
-                        .font(.Text1)
-                        .lineSpacing(2)
-                        .foregroundColor(.subtitle)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                        .padding(.top, 4)
-                    
-                    Rectangle()
-                        .fill(Color.white.opacity(0.15))
-                        .frame(height: 0.5)
-                        .padding(.top, 12)
-                }
-                .padding(.horizontal, 16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                
-                HStack(spacing: 12) {
-                    Image(trackThumbnail)
+            ZStack {
+                // Background: artist photo at top and mirrored version below
+                VStack(spacing: 0) {
+                    Image(artistPhoto)
                         .resizable()
                         .scaledToFill()
-                        .frame(width: 80, height: 80)
+                        .frame(width: backgroundImageSize, height: backgroundImageSize)
                         .clipped()
-                        .cornerRadius(6)
                     
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(trackTitle)
-                            .font(.Text1)
-                            .foregroundColor(.fill1)
-                            .lineLimit(2)
+                    Image(artistPhoto)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: backgroundImageSize, height: backgroundImageSize)
+                        .clipped()
+                        .scaleEffect(x: -1, y: -1)
+                        .frame(width: backgroundImageSize, height: bottomBackgroundHeight, alignment: .top)
+                }
+                
+                // Gradient blur overlay
+                VariableBlurView(maxBlurRadius: 28, direction: .blurredBottomClearTop)
+                    .frame(width: cardWidth, height: blurHeight)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                
+                VStack(spacing: 0) {
+                    // Artist info (artist name, description, divider)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Spacer()
                         
-                        Text(releaseDate)
+                        VStack(alignment: .leading, spacing: -8) {
+                            Text("New Album Out Now")
+                                .font(.Headline3)
+                                .foregroundColor(.white.opacity(0.4))
+                            
+                            Text(artistName)
+                                .font(.Headline3)
+                                .foregroundColor(.fill1)
+                                .lineLimit(1)
+                        }
+                        
+                        Text(albumDescription)
                             .font(.Text1)
-                            .foregroundColor(.white.opacity(0.6))
-                            .lineLimit(1)
+                            .lineSpacing(2)
+                            .foregroundColor(.subtitle)
+                            .lineLimit(3)
+                            .multilineTextAlignment(.leading)
+                            .padding(.top, 4)
+                        
+                        Rectangle()
+                            .fill(Color.white.opacity(0.15))
+                            .frame(height: 0.5)
+                            .padding(.top, 12)
                     }
+                    .padding(.horizontal, 16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    Spacer()
-                    
+                    // Album preview with cover, title, date, and action buttons
                     HStack(spacing: 12) {
-                        AnimatedIconButton(
-                            icon1: "like-default",
-                            icon2: "like-active",
-                            isActive: isLiked,
-                            iconSize: 20
-                        ) {
-                            handleLikeTap()
-                        }
-                        .modifier(SuppressNavigationModifier(isActive: $suppressNavigation))
+                        Image(trackThumbnail)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 80, height: 80)
+                            .clipped()
+                            .cornerRadius(6)
                         
-                        PlayPauseButton(isPlaying: isPlaying, size: 40) {
-                            handlePlayTap()
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(trackTitle)
+                                .font(.Text1)
+                                .foregroundColor(.fill1)
+                                .lineLimit(2)
+                            
+                            Text(releaseDate)
+                                .font(.Text1)
+                                .foregroundColor(.white.opacity(0.6))
+                                .lineLimit(1)
                         }
-                        .modifier(SuppressNavigationModifier(isActive: $suppressNavigation))
+                        
+                        Spacer()
+                        
+                        // Like and play/pause buttons
+                        HStack(spacing: 12) {
+                            AnimatedIconButton(
+                                icon1: "like-default",
+                                icon2: "like-active",
+                                isActive: isLiked,
+                                iconSize: 20
+                            ) {
+                                handleLikeTap()
+                            }
+                            .modifier(SuppressNavigationModifier(isActive: $suppressNavigation))
+                            
+                            PlayPauseButton(isPlaying: isPlaying, size: 40) {
+                                handlePlayTap()
+                            }
+                            .modifier(SuppressNavigationModifier(isActive: $suppressNavigation))
+                        }
+                    }
+                    .padding(.top, 16)
+                    .padding(.horizontal, 16)
+                }
+                .padding(.bottom, 16)
+            }
+            .frame(width: cardWidth, height: cardHeight, alignment: .bottom)
+            .clipped()
+            .cornerRadius(16)
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
+            )
+            .overlay(
+                Group {
+                    if showHeartExplosion {
+                        HeartExplosionView(centerPosition: likeButtonPosition)
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                    showHeartExplosion = false
+                                }
+                            }
                     }
                 }
-                .padding(.top, 16)
-                .padding(.horizontal, 16)
-            }
-            .padding(.bottom, 16)
+            )
         }
-        .frame(width: 320, height: 430, alignment: .bottom)
-        .clipped()
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
-        )
-        .overlay(
-            Group {
-                if showHeartExplosion {
-                    HeartExplosionView(centerPosition: likeButtonPosition)
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                                showHeartExplosion = false
-                            }
-                        }
-                }
-            }
-        )
     }
     
+    // Handles like button tap: toggles state, shows heart animation and toast
     private func handleLikeTap() {
         // Reduce animation complexity for better performance
         withAnimation(.easeInOut(duration: 0.15)) {
@@ -208,11 +223,12 @@ private struct NewReleaseCardContent: View {
             }
             // Show global toast when liked
             ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: trackThumbnail)
+            
+            onLike()
         }
-        
-        onLike()
     }
     
+    // Handles play/pause button tap: toggles state and triggers callback
     private func handlePlayTap() {
         withAnimation(.easeInOut(duration: 0.15)) {
             isPlaying.toggle()
@@ -221,6 +237,7 @@ private struct NewReleaseCardContent: View {
     }
 }
 
+// Prevents card navigation when tapping interactive elements (like/play buttons)
 private struct SuppressNavigationModifier: ViewModifier {
     @Binding var isActive: Bool
     
@@ -240,6 +257,7 @@ private struct SuppressNavigationModifier: ViewModifier {
     }
 }
 
+// Horizontal scrolling carousel for displaying multiple new release cards
 struct NewReleaseCarousel: View {
     let releases: [NewReleaseData]
     let onReleaseTap: (NewReleaseData) -> Void
@@ -247,6 +265,9 @@ struct NewReleaseCarousel: View {
     let onPlay: (NewReleaseData) -> Void
     
     var body: some View {
+        let cardWidth = UIScreen.main.bounds.width * 0.85
+        let cardHeight = cardWidth * 1.34
+        
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
                 ForEach(Array(releases.enumerated()), id: \.offset) { index, release in
@@ -269,6 +290,7 @@ struct NewReleaseCarousel: View {
                             onPlay(release)
                         }
                     )
+                    .frame(width: cardWidth, height: cardHeight)
                 }
             }
             .padding(.horizontal, 16)

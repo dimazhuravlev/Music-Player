@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Models
 
-struct Track {
+struct Track: Identifiable {
     let id: Int
     let title: String
     let artist: String
@@ -12,6 +12,7 @@ struct Track {
 
 struct TrackRow: View {
     let track: Track
+    var onTap: (() -> Void)?
     @State private var isPlaying = false
     
     var body: some View {
@@ -50,7 +51,9 @@ struct TrackRow: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
-        .onTapGesture { isPlaying.toggle() }
+        .onTapGesture {
+            onTap?()
+        }
         .overlay(
             Rectangle()
                 .fill(Color.white.opacity(0.15))
