@@ -57,7 +57,7 @@ struct GenreCard: View {
                             diameter: item.diameter,
                             in: size
                         )
-                        avatar(imageName: item.imageName, diameter: item.diameter)
+                        avatar(imageName: item.imageName, diameter: item.diameter, imageURL: item.imageURL)
                             .position(x: clampedPosition.x, y: clampedPosition.y)
                             .animation(.smooth(duration: 0.25), value: gyroManager.roll)
                             .animation(.smooth(duration: 0.25), value: gyroManager.pitch)
@@ -172,7 +172,7 @@ private extension GenreCard {
         return specs
     }
     
-    func avatar(imageName: String, diameter: CGFloat) -> some View {
+    func avatar(imageName: String, diameter: CGFloat, imageURL: URL? = nil) -> some View {
         Group {
             if genreDefinition.genre == "Artist Selection" {
                 // Show plus icon for artist selection card
@@ -180,21 +180,18 @@ private extension GenreCard {
                     Circle()
                         .fill(Color.white.opacity(0.1))
                         .frame(width: diameter, height: diameter)
-                    
+
                     Image(systemName: "plus")
                         .font(.system(size: 20, weight: .medium))
                         .foregroundColor(.white.opacity(0.7))
                 }
             } else {
             // Show artist photo for regular cards
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
+            CachedAsyncImage(url: imageURL, assetName: imageName)
                 .frame(width: diameter, height: diameter)
                 .clipShape(Circle())
                 .overlay(
                     Circle()
-                        // .stroke(Color.white.opacity(0.1), lineWidth: 1)
                         .strokeBorder(Color.white.opacity(0.1), lineWidth: 1)
                 )
             }

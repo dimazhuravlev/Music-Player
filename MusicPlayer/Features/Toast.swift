@@ -3,6 +3,7 @@ import SwiftUI
 struct ToastConfig: Equatable {
     var title: String
     var coverImageName: String? = nil
+    var coverImageURL: URL? = nil
     var duration: TimeInterval = 4
     var id = UUID()
 }
@@ -16,10 +17,8 @@ struct ToastView: View {
         HStack(spacing: 8) {
 
             // Artist/album/playlist cover
-            if let cover = config.coverImageName, !cover.isEmpty {
-                Image(cover)
-                    .resizable()
-                    .scaledToFill()
+            if config.coverImageURL != nil || (config.coverImageName != nil && !config.coverImageName!.isEmpty) {
+                CachedAsyncImage(url: config.coverImageURL, assetName: config.coverImageName ?? "album")
                     .frame(width: 32, height: 32)
                     .clipped()
                     .cornerRadius(4)
@@ -84,10 +83,11 @@ class ToastManager: ObservableObject {
     private init() {}
 
     /// Call this to show a toast
-    func show(title: String, cover: String? = nil, duration: TimeInterval = 4) {
+    func show(title: String, cover: String? = nil, coverURL: URL? = nil, duration: TimeInterval = 4) {
         currentConfig = ToastConfig(
             title: title,
             coverImageName: cover,
+            coverImageURL: coverURL,
             duration: duration
         )
         isPresented = true

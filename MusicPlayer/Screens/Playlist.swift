@@ -9,6 +9,10 @@ struct Playlist: View {
     @State private var selectedFilter = "Top"
     @State private var scrollOffset: CGFloat = 0
     @EnvironmentObject private var collectionState: CollectionState
+    @EnvironmentObject private var showcaseNavState: ShowcaseNavState
+    @EnvironmentObject private var shareOverlayState: ShareOverlayState
+    @EnvironmentObject private var overflowMenuState: OverflowMenuState
+    @EnvironmentObject private var gyroManager: GyroManager
     
     init(playlistName: String? = nil) {
         self.playlistName = playlistName
@@ -32,15 +36,12 @@ struct Playlist: View {
                 Spacer()
             }
             
-            // Fixed bottom bar that stays in place during navigation
-            VStack {
-                Spacer()
-                BottomBar()
-            }
         }
         #if os(iOS)
         .navigationBarHidden(true)
         #endif
+        .onAppear { showcaseNavState.isShowingDetail = true }
+        .onDisappear { showcaseNavState.isShowingDetail = false }
     }
     
     private var backgroundView: some View {
@@ -57,10 +58,8 @@ struct Playlist: View {
                 
                 // ZStack with image and content overlaid
                 ZStack(alignment: .bottomLeading) {
-                    // Image layer (always square shape)
-                    Image(playlistImageName)
-                        .resizable()
-                        .scaledToFill()
+                    // Image layer — 3D наклон по гироскопу
+                    CachedAsyncImage(url: nil, assetName: playlistImageName)
                         .frame(maxWidth: .infinity)
                         .aspectRatio(1, contentMode: .fill)
                         .clipped()
@@ -98,6 +97,7 @@ struct Playlist: View {
                                 }
                             }
                         )
+                        .gyroscope3DTilt(gyroManager, intensity: 8, perspective: 0.9)
                     
                     // Content VStack overlaid on image
                     VStack(alignment: .leading, spacing: 16) {
@@ -109,6 +109,12 @@ struct Playlist: View {
                         HStack(spacing: 6) {
                             ListenButton(isPlaying: $isPlaying)
                             Spacer()
+                            ShareButton(onShare: {
+                        shareOverlayState.present(.playlist(
+                            title: playlistName ?? "Playlist",
+                            coverImageName: playlistImageName
+                        ))
+                    })
                             LikeButton(isLiked: $isLiked) {
                                 ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: playlistImageName)
                                 collectionState.registerLike(coverName: playlistImageName)
@@ -124,7 +130,21 @@ struct Playlist: View {
                 }
                 
                 // TrackList below the image
-                TrackListView(tracks: sampleTracks, title: "Top Tracks")
+                TrackListView(
+                    tracks: sampleTracks,
+                    title: "Top Tracks",
+                    onTrackLongPress: { track in
+                        overflowMenuState.present(ShareableEntity(
+                            title: track.title,
+                            subtitle: track.artist,
+                            year: track.releaseYear,
+                            coverImageName: track.albumCover,
+                            artistImageName: nil,
+                            coverImageURL: track.albumCoverURL,
+                            artistImageURL: track.artistThumbnailURL
+                        ))
+                    }
+                )
                     .offset(y: 100)
                 
                 Spacer(minLength: 120)
@@ -136,7 +156,7 @@ struct Playlist: View {
     
     
     private var sampleTracks: [Track] {
-        return TrackDataManager.shared.getSampleTracks()
+        return ContentCurationManager.shared.curatedTracks
     }
     
     private var playlistImageName: String {
@@ -177,9 +197,7 @@ struct ArtistHeader: View {
     
     private var artistImage: some View {
         ZStack(alignment: .bottom) {
-            Image(playlistImageName)
-                .resizable()
-                .scaledToFill()
+            CachedAsyncImage(url: nil, assetName: playlistImageName)
                 .frame(maxWidth: .infinity)
                 .aspectRatio(1/1, contentMode: .fill)
                 .clipped()
@@ -199,12 +217,13 @@ struct ArtistHeader: View {
             HStack(spacing: 6) {
                 ListenButton(isPlaying: $isPlaying)
                 Spacer()
+                ShareButton(onShare: onShare)
                 LikeButton(isLiked: $isLiked) {
                     ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: playlistImageName)
                     collectionState.registerLike(coverName: playlistImageName)
                 }
             }
-            
+
             FilterCarousel(selectedFilter: $selectedFilter)
         }
         .padding(.horizontal, 16)
@@ -236,6 +255,29 @@ struct ListenButton: View {
             .background(Color.accent)
             .cornerRadius(25)
         }
+    }
+}
+
+struct ShareButton: View {
+    var onShare: (() -> Void)? = nil
+    
+    var body: some View {
+        Button(action: {
+            #if os(iOS)
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            #endif
+            onShare?()
+        }) {
+            Image("share")
+                .resizable()
+                .renderingMode(.template)
+                .foregroundColor(.fill1)
+                .frame(width: 20, height: 20)
+                .frame(width: 40, height: 40)
+                .background(Color.white.opacity(0.1))
+                .clipShape(Circle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -330,6 +372,10 @@ struct FilterButton: View {
 #Preview {
     NavigationStack {
         Playlist(playlistName: "Anasheed")
+            .environmentObject(GyroManager.shared)
+            .environmentObject(ShowcaseNavState())
+            .environmentObject(ShareOverlayState())
+            .environmentObject(OverflowMenuState())
             .environmentObject(NowPlayingState())
             .environmentObject(CollectionState())
     }

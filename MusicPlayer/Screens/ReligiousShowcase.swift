@@ -2,15 +2,14 @@ import SwiftUI
 
 struct ReligiousShowcase: View {
     @State private var selectedPlaylist: String?
-    @State private var navigateToPlayer = false
-    
+    @State private var navigateToPlaylist = false
+    @EnvironmentObject private var overflowMenuState: OverflowMenuState
+
     var body: some View {
         ZStack {
-            // Black background
             Color.black
                 .ignoresSafeArea()
-            
-            // Scrollable content
+
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 32) {
                     PlaylistCarousel(
@@ -21,12 +20,12 @@ struct ReligiousShowcase: View {
                             PlaylistCard(imageName: "MorningAzkar", onTap: {}),
                             PlaylistCard(imageName: "Ruqya", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
-                            navigateToPlayer = true
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
+                            navigateToPlaylist = true
                         }
                     )
-                    
+
                     PlaylistCarousel(
                         title: "Prayer & Meditation",
                         playlists: [
@@ -35,12 +34,12 @@ struct ReligiousShowcase: View {
                             PlaylistCard(imageName: "EveningAzkar", onTap: {}),
                             PlaylistCard(imageName: "Anasheed", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
-                            navigateToPlayer = true
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
+                            navigateToPlaylist = true
                         }
                     )
-                    
+
                     PlaylistCarousel(
                         title: "Quranic Verses",
                         playlists: [
@@ -49,12 +48,12 @@ struct ReligiousShowcase: View {
                             PlaylistCard(imageName: "MorningAzkar", onTap: {}),
                             PlaylistCard(imageName: "Ruqya", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
-                            navigateToPlayer = true
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
+                            navigateToPlaylist = true
                         }
                     )
-                    
+
                     PlaylistCarousel(
                         title: "Spiritual Healing",
                         playlists: [
@@ -63,12 +62,12 @@ struct ReligiousShowcase: View {
                             PlaylistCard(imageName: "Anasheed", onTap: {}),
                             PlaylistCard(imageName: "Ruqya", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
-                            navigateToPlayer = true
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
+                            navigateToPlaylist = true
                         }
                     )
-                    
+
                     PlaylistCarousel(
                         title: "Divine Wisdom",
                         playlists: [
@@ -77,9 +76,9 @@ struct ReligiousShowcase: View {
                             PlaylistCard(imageName: "MorningAzkar", onTap: {}),
                             PlaylistCard(imageName: "EveningAzkar", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
-                            navigateToPlayer = true
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
+                            navigateToPlaylist = true
                         }
                     )
                 }
@@ -88,7 +87,7 @@ struct ReligiousShowcase: View {
             }
             .background(Color.black)
         }
-        .navigationDestination(isPresented: $navigateToPlayer) {
+        .navigationDestination(isPresented: $navigateToPlaylist) {
             Playlist(playlistName: selectedPlaylist)
         }
     }
@@ -96,4 +95,5 @@ struct ReligiousShowcase: View {
 
 #Preview {
     ReligiousShowcase()
+        .environmentObject(OverflowMenuState())
 }

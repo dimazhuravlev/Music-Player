@@ -4,11 +4,13 @@ import SwiftUI
 struct TrackListView: View {
     let tracks: [Track]
     let title: String
+    var onTrackLongPress: ((Track) -> Void)? = nil
     @State private var selectedTrack: Track?
-    
-    init(tracks: [Track], title: String = "Tracks") {
+
+    init(tracks: [Track], title: String = "Tracks", onTrackLongPress: ((Track) -> Void)? = nil) {
         self.tracks = tracks
         self.title = title
+        self.onTrackLongPress = onTrackLongPress
     }
     
     var body: some View {
@@ -21,9 +23,11 @@ struct TrackListView: View {
             
             VStack(spacing: 0) {
                 ForEach(tracks) { track in
-                    TrackRow(track: track) {
-                        selectedTrack = track
-                    }
+                    TrackRow(
+                        track: track,
+                        onTap: { selectedTrack = track },
+                        onLongPress: onTrackLongPress.map { handler in { handler(track) } }
+                    )
                 }
             }
         }

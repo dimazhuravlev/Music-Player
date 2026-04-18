@@ -3,64 +3,103 @@ import VariableBlur
 import CoreHaptics
 
 struct TopNavBar: View {
+    @EnvironmentObject private var offlineModeState: OfflineModeState
     @Binding var selectedTab: Int
     @State private var pressedTabIndex: Int? = nil
     @State private var hapticEngine: CHHapticEngine?
     @State private var previousSelectedTab: Int = 0
     @State private var showWizard = false
+    /// Витрина Offline: визуальное состояние тоггла (модель `isEnabled` сбрасывается позже в анимации выхода).
+    @State private var offlineHeaderToggleOn = true
     
-    let tabs = ["For You", "Trends", "Spiritual"]
+    let tabs: [String]
+    /// Витрина Offline: выключение офлайн-режима (обратная вспышка → Коллекция / Downloads).
+    let onRequestDisableOffline: (() -> Void)?
+    /// Идёт обратная вспышка выхода из офлайна — чтобы вернуть тоггл, если переход прервали.
+    let isOfflineExitFlashActive: Bool
+    
+    init(
+        selectedTab: Binding<Int>,
+        tabs: [String] = ["For You", "Trends", "Spiritual"],
+        onRequestDisableOffline: (() -> Void)? = nil,
+        isOfflineExitFlashActive: Bool = false
+    ) {
+        self._selectedTab = selectedTab
+        self.tabs = tabs
+        self.onRequestDisableOffline = onRequestDisableOffline
+        self.isOfflineExitFlashActive = isOfflineExitFlashActive
+    }
     
     var body: some View {
         HStack {
-            // Tab buttons with indicator
-            HStack(spacing: 10) {
-                ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
-                    Text(tab)
+            if tabs.count == 1 {
+                HStack(alignment: .center, spacing: 14) {
+                    Text(tabs[0])
                         .font(.Headline3)
-                        .foregroundColor(selectedTab == index ? .fill1 : .white.opacity(0.35))
-                        // .shadow(color: selectedTab == index ? .clear : .black.opacity(0.5), radius: 2, x: 0, y: 0)
-                        // .shadow(color: selectedTab == index ? .clear : .black.opacity(0.2), radius: 4, x: 0, y: 2)
-                        .animation(.smooth(duration: 0.4), value: selectedTab)
-                        .scaleEffect(pressedTabIndex == index ? 0.9 : 1.0)
-                        .animation(.smooth(duration: 0.1), value: pressedTabIndex)
-                        .onTapGesture {
-                            selectedTab = index
-                            if index != previousSelectedTab {
-                                playTabSwitchHaptic()
-                            }
-                            previousSelectedTab = index
-                        }
-                        .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { pressing in
-                            pressedTabIndex = pressing ? index : nil
-                        }, perform: {})
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    if pressedTabIndex == nil {
-                                        pressedTabIndex = index
-                                    }
+                        .foregroundColor(.fill1)
+                    if let disableOffline = onRequestDisableOffline {
+                        Toggle(
+                            "",
+                            isOn: Binding(
+                                get: { offlineHeaderToggleOn },
+                                set: { on in
+                                    guard !on else { return }
+                                    offlineHeaderToggleOn = false
+                                    disableOffline()
                                 }
-                                .onEnded { _ in
-                                    pressedTabIndex = nil
-                                }
+                            )
                         )
+                        .labelsHidden()
+                        .tint(Color.accent)
+                        .disabled(isOfflineExitFlashActive)
+                    }
                 }
-            }
-            .overlay(alignment: .topLeading) {
-                // Active tab indicator (white pin) - positioned precisely
-                GeometryReader { geometry in
-                    let tabWidth = (geometry.size.width - CGFloat(tabs.count - 1) * 10) / CGFloat(tabs.count)
-                    let pinX = CGFloat(selectedTab) * (tabWidth + 5) + tabWidth / 2
-                    
-                    Circle()
-                        .fill(Color.fill1)
-                        .frame(width: 8, height: 8)
-                        .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 0)
-                        .position(x: pinX, y: 48)
-                        .animation(.spring(response: 0.6, dampingFraction: 0.75, blendDuration: 0), value: selectedTab)
+            } else {
+                HStack(spacing: 10) {
+                    ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                        Text(tab)
+                            .font(.Headline3)
+                            .foregroundColor(selectedTab == index ? .fill1 : .white.opacity(0.35))
+                            .animation(.smooth(duration: 0.4), value: selectedTab)
+                            .scaleEffect(pressedTabIndex == index ? 0.9 : 1.0)
+                            .animation(.smooth(duration: 0.1), value: pressedTabIndex)
+                            .onTapGesture {
+                                selectedTab = index
+                                if index != previousSelectedTab {
+                                    playTabSwitchHaptic()
+                                }
+                                previousSelectedTab = index
+                            }
+                            .onLongPressGesture(minimumDuration: 0, maximumDistance: .infinity, pressing: { pressing in
+                                pressedTabIndex = pressing ? index : nil
+                            }, perform: {})
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { _ in
+                                        if pressedTabIndex == nil {
+                                            pressedTabIndex = index
+                                        }
+                                    }
+                                    .onEnded { _ in
+                                        pressedTabIndex = nil
+                                    }
+                            )
+                    }
                 }
-                .frame(height: 40)
+                .overlay(alignment: .topLeading) {
+                    GeometryReader { geometry in
+                        let tabWidth = (geometry.size.width - CGFloat(tabs.count - 1) * 10) / CGFloat(tabs.count)
+                        let pinX = CGFloat(selectedTab) * (tabWidth + 5) + tabWidth / 2
+                        
+                        Circle()
+                            .fill(Color.fill1)
+                            .frame(width: 8, height: 8)
+                            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 0)
+                            .position(x: pinX, y: 48)
+                            .animation(.spring(response: 0.6, dampingFraction: 0.75, blendDuration: 0), value: selectedTab)
+                    }
+                    .frame(height: 40)
+                }
             }
             
             Spacer()
@@ -126,6 +165,19 @@ struct TopNavBar: View {
         }
         .onAppear {
             setupHapticEngine()
+            if onRequestDisableOffline != nil {
+                offlineHeaderToggleOn = offlineModeState.isEnabled
+            }
+        }
+        .onChange(of: offlineModeState.isEnabled) { _, enabled in
+            guard onRequestDisableOffline != nil else { return }
+            offlineHeaderToggleOn = enabled
+        }
+        .onChange(of: isOfflineExitFlashActive) { _, active in
+            guard onRequestDisableOffline != nil else { return }
+            if !active && offlineModeState.isEnabled {
+                offlineHeaderToggleOn = true
+            }
         }
     }
     
@@ -182,5 +234,6 @@ struct TopNavBar: View {
 #Preview {
     ZStack {
         TopNavBar(selectedTab: .constant(0))
+            .environmentObject(OfflineModeState())
     }
 }

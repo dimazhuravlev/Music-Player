@@ -5,103 +5,100 @@ struct MiniPlayer: View {
     @Binding var isPlaying: Bool
     let track: Track
     var onTap: (() -> Void)?
+    @ObservedObject private var audioPlayer = AudioPlayerManager.shared
     @State private var rotation: Double = 0
     @State private var lastUpdateTime: Date = Date()
     @State private var currentSpeed: Double = 0
     @State private var hapticEngine: CHHapticEngine?
     @State private var previousIsPlaying: Bool = false
     @State private var displayedCover: String = "album"
+    @State private var displayedCoverURL: URL? = nil
     @State private var coverOpacity: Double = 1
     @State private var isPressed: Bool = false
-    private let targetSpeed: Double = 60 // degrees per second
+    private let targetSpeed: Double = 40 // degrees per second
     
     var body: some View {
-        HStack(spacing: 20) {
-            // Album art
-            TimelineView(.animation) { timeline in
-                Image(displayedCover)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 56, height: 56)
-                    .clipShape(Circle())
-                    .overlay(
+        TimelineView(.animation) { timeline in
+            CachedAsyncImage(url: displayedCoverURL, assetName: displayedCover)
+                .frame(width: 56, height: 56)
+                .clipShape(Circle())
+                .rotationEffect(.degrees(rotation))
+                .opacity(coverOpacity)
+                .overlay {
+                    ZStack {
+                        // Background timeline ring (behind progress but above cover)
                         Circle()
-                        .stroke(Color.white.opacity(0.1), lineWidth: 0.66)
-                    )
-                    .rotationEffect(.degrees(rotation))
-                    .opacity(coverOpacity)
-                    .onChange(of: timeline.date) { _, newTime in
-                        let delta = newTime.timeIntervalSince(lastUpdateTime)
+                            .stroke(Color.white.opacity(0.1), lineWidth: 2)
+                            .rotationEffect(.degrees(-90))
                         
-                        // Manual interpolation for smooth acceleration/deceleration
-                        let target = isPlaying ? targetSpeed : 0
-                        currentSpeed += (target - currentSpeed) * 0.04
-                        
-                        rotation += currentSpeed * delta
-                        rotation = rotation.truncatingRemainder(dividingBy: 360)
-                        lastUpdateTime = newTime
-                        
-                        // Check for playback start to trigger haptic
-                        if isPlaying && !previousIsPlaying {
-                            playStartHaptic()
-                        }
-                        previousIsPlaying = isPlaying
+                        // Progress ring
+                        Circle()
+                            .trim(from: 0, to: audioPlayer.progress)
+                            .stroke(
+                                Color.white,
+                                style: StrokeStyle(lineWidth: 2, lineCap: .round)
+                            )
+                            .rotationEffect(.degrees(-90))
+                            .opacity(1)
                     }
-                    .onChange(of: track.id) { _, _ in
-                        withAnimation(.smooth(duration: 0.3)) {
-                            coverOpacity = 0
-                        }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            displayedCover = track.albumCover
-                            withAnimation(.smooth(duration: 0.3)) {
-                                coverOpacity = 1
-                            }
-                        }
-                    }
+                    .frame(width: 58, height: 58)
+                }
+                .frame(width: 68, height: 68)
+            .onChange(of: timeline.date) { _, newTime in
+                let delta = newTime.timeIntervalSince(lastUpdateTime)
+                
+                // Manual interpolation for smooth acceleration/deceleration
+                let target = isPlaying ? targetSpeed : 0
+                currentSpeed += (target - currentSpeed) * 0.04
+                
+                rotation += currentSpeed * delta
+                rotation = rotation.truncatingRemainder(dividingBy: 360)
+                lastUpdateTime = newTime
+
+                // On play start: jump to full speed immediately so rotation is visible right away.
+                // Smooth lerp is kept for deceleration (spin-down) when pausing.
+                if isPlaying && !previousIsPlaying {
+                    currentSpeed = targetSpeed
+                    playStartHaptic()
+                }
+                previousIsPlaying = isPlaying
             }
-            
-            // Animated play/pause icon
-            AnimatedIconButton(
-                icon1: "play",
-                icon2: "pause",
-                isActive: isPlaying,
-                iconSize: 24
-            ) {
-                isPlaying.toggle()
-            }
-        }
-        .padding(.leading, 4)
-        .padding(.trailing, 20)
-        .padding(.vertical, 4)
-        .background(.ultraThinMaterial)
-        .background(Color.white.opacity(0.01).blendMode(.overlay))
-        .cornerRadius(72)
-        .overlay(
-            RoundedRectangle(cornerRadius: 72)
-                .stroke(Color.white.opacity(0.08), lineWidth: 0.66)
-        )
-        .contentShape(RoundedRectangle(cornerRadius: 72))
-        .scaleEffect(isPressed ? 0.95 : 1.0)
-        .animation(.smooth(duration: 0.15), value: isPressed)
-        .onTapGesture {
-            onTap?()
-        }
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    withAnimation(.smooth(duration: 0.12)) {
-                        isPressed = true
+            .onChange(of: track.id) { _, _ in
+                withAnimation(.smooth(duration: 0.3)) {
+                    coverOpacity = 0
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    displayedCover = track.albumCover
+                    displayedCoverURL = track.albumCoverURL
+                    withAnimation(.smooth(duration: 0.3)) {
+                        coverOpacity = 1
                     }
                 }
-                .onEnded { _ in
-                    withAnimation(.smooth(duration: 0.12)) {
-                        isPressed = false
+            }
+            .contentShape(Circle())
+            .scaleEffect(isPressed ? 0.95 : 1.0)
+            .animation(.smooth(duration: 0.15), value: isPressed)
+            .onTapGesture {
+                onTap?()
+            }
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        withAnimation(.smooth(duration: 0.12)) {
+                            isPressed = true
+                        }
                     }
-                }
-        )
+                    .onEnded { _ in
+                        withAnimation(.smooth(duration: 0.12)) {
+                            isPressed = false
+                        }
+                    }
+            )
+        }
         .onAppear {
             setupHapticEngine()
             displayedCover = track.albumCover
+            displayedCoverURL = track.albumCoverURL
         }
     }
     

@@ -1,25 +1,34 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 // MARK: - Models
 
-struct Track: Identifiable {
+struct Track: Identifiable, Codable {
     let id: Int
     let title: String
     let artist: String
     let albumCover: String
     let releaseYear: Int
+    var albumCoverURL: URL? = nil
+    var artistImageURL: URL? = nil      // XL (1000px) for player background
+    var artistThumbnailURL: URL? = nil  // Medium (250px) for small avatars
+    var deezerAlbumId: Int? = nil
+    var previewURL: URL? = nil
+    var albumTitle: String? = nil       // Album name shown in player header
+    var trackTitle: String? = nil       // A real track name from that album
 }
 
 struct TrackRow: View {
     let track: Track
     var onTap: (() -> Void)?
+    var onLongPress: (() -> Void)? = nil
     @State private var isPlaying = false
     
     var body: some View {
         HStack(spacing: 12) {
-            Image(track.albumCover)
-                .resizable()
-                .scaledToFill()
+            CachedAsyncImage(url: track.albumCoverURL, assetName: track.albumCover)
                 .frame(width: 48, height: 48)
                 .cornerRadius(6)
                 .overlay(
@@ -41,7 +50,7 @@ struct TrackRow: View {
             
             Spacer()
             
-            Button(action: {}) {
+            Button(action: { onLongPress?() }) {
                 Image(systemName: "ellipsis")
                     .font(.Text1)
                     .foregroundColor(.subtitle)
@@ -53,6 +62,12 @@ struct TrackRow: View {
         .contentShape(Rectangle())
         .onTapGesture {
             onTap?()
+        }
+        .onLongPressGesture(minimumDuration: 0.3) {
+            #if os(iOS)
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            #endif
+            onLongPress?()
         }
         .overlay(
             Rectangle()

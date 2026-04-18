@@ -13,12 +13,15 @@ struct NewReleaseCard: View {
     let onTap: () -> Void
     let onLike: () -> Void
     let onPlay: () -> Void
+    var onLongPress: (() -> Void)? = nil
+    var artistPhotoURL: URL? = nil
+    var trackThumbnailURL: URL? = nil
     
     @State private var suppressNavigation = false
     @State private var isLiked: Bool = false
     @State private var isPlaying: Bool = false
     @State private var showHeartExplosion: Bool = false
-    @State private var likeButtonPosition: CGPoint = CGPoint(x: 240, y: 360)
+    @State private var likeButtonPosition: CGPoint = CGPoint(x: 260, y: 390)
     
     var body: some View {
         Button {
@@ -42,10 +45,21 @@ struct NewReleaseCard: View {
                 likeButtonPosition: $likeButtonPosition,
                 onLike: onLike,
                 onPlay: onPlay,
-                suppressNavigation: $suppressNavigation
+                suppressNavigation: $suppressNavigation,
+                artistPhotoURL: artistPhotoURL,
+                trackThumbnailURL: trackThumbnailURL
             )
         }
         .buttonStyle(NewReleaseCardButtonStyle())
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.3).onEnded { _ in
+                suppressNavigation = true
+                #if os(iOS)
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                #endif
+                onLongPress?()
+            }
+        )
     }
 }
 
@@ -77,6 +91,8 @@ private struct NewReleaseCardContent: View {
     let onLike: () -> Void
     let onPlay: () -> Void
     @Binding var suppressNavigation: Bool
+    var artistPhotoURL: URL? = nil
+    var trackThumbnailURL: URL? = nil
     
     var body: some View {
         GeometryReader { geometry in
@@ -89,15 +105,11 @@ private struct NewReleaseCardContent: View {
             ZStack {
                 // Background: artist photo at top and mirrored version below
                 VStack(spacing: 0) {
-                    Image(artistPhoto)
-                        .resizable()
-                        .scaledToFill()
+                    CachedAsyncImage(url: artistPhotoURL, assetName: artistPhoto)
                         .frame(width: backgroundImageSize, height: backgroundImageSize)
                         .clipped()
-                    
-                    Image(artistPhoto)
-                        .resizable()
-                        .scaledToFill()
+
+                    CachedAsyncImage(url: artistPhotoURL, assetName: artistPhoto)
                         .frame(width: backgroundImageSize, height: backgroundImageSize)
                         .clipped()
                         .scaleEffect(x: -1, y: -1)
@@ -143,9 +155,7 @@ private struct NewReleaseCardContent: View {
                     
                     // Album preview with cover, title, date, and action buttons
                     HStack(spacing: 12) {
-                        Image(trackThumbnail)
-                            .resizable()
-                            .scaledToFill()
+                        CachedAsyncImage(url: trackThumbnailURL, assetName: trackThumbnail)
                             .frame(width: 80, height: 80)
                             .clipped()
                             .cornerRadius(6)
@@ -222,7 +232,7 @@ private struct NewReleaseCardContent: View {
                 showHeartExplosion = true
             }
             // Show global toast when liked
-            ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: trackThumbnail)
+            ToastManager.shared.show(title: ToastCopy.randomLikeTitle(), cover: trackThumbnail, coverURL: trackThumbnailURL)
             
             onLike()
         }
@@ -263,6 +273,7 @@ struct NewReleaseCarousel: View {
     let onReleaseTap: (NewReleaseData) -> Void
     let onLike: (NewReleaseData) -> Void
     let onPlay: (NewReleaseData) -> Void
+    var onLongPress: ((NewReleaseData) -> Void)? = nil
     
     var body: some View {
         let cardWidth = UIScreen.main.bounds.width * 0.85
@@ -270,7 +281,7 @@ struct NewReleaseCarousel: View {
         
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 8) {
-                ForEach(Array(releases.enumerated()), id: \.offset) { index, release in
+                ForEach(releases) { release in
                     NewReleaseCard(
                         albumCover: release.albumCover,
                         artistName: release.artistName,
@@ -288,7 +299,10 @@ struct NewReleaseCarousel: View {
                         },
                         onPlay: {
                             onPlay(release)
-                        }
+                        },
+                        onLongPress: onLongPress.map { handler in { handler(release) } },
+                        artistPhotoURL: release.artistPhotoURL,
+                        trackThumbnailURL: release.trackThumbnailURL
                     )
                     .frame(width: cardWidth, height: cardHeight)
                 }
@@ -299,7 +313,8 @@ struct NewReleaseCarousel: View {
 }
 
 // Data model for new releases
-struct NewReleaseData {
+struct NewReleaseData: Identifiable, Hashable, Codable {
+    var id: String { "\(albumCover)|\(artistName)|\(trackTitle)" }
     let albumCover: String
     let artistName: String
     let albumDescription: String
@@ -308,6 +323,18 @@ struct NewReleaseData {
     let trackSubtitle: String
     let releaseDate: String
     let artistPhoto: String
+    var albumCoverURL: URL? = nil
+    var artistPhotoURL: URL? = nil
+    var artistThumbnailURL: URL? = nil
+    var trackThumbnailURL: URL? = nil
+    var deezerAlbumId: Int? = nil
+
+    /// e.g. "15 Jul 2025" → 2025
+    var parsedReleaseYear: Int? {
+        let parts = releaseDate.split(separator: " ")
+        guard let last = parts.last, let year = Int(last) else { return nil }
+        return year
+    }
 }
 
 

@@ -2,64 +2,17 @@ import SwiftUI
 
 struct TrendsShowcase: View {
     @State private var selectedPlaylist: String?
+    @State private var selectedAlbumItem: AlbumCardItem?
     @State private var navigateToPlayer = false
-    @State private var selectedAlbum: String?
     @State private var navigateToAlbum = false
+    @State private var selectedNewRelease: NewReleaseData?
     @EnvironmentObject private var collectionState: CollectionState
-    
-    // New releases data
-    private let newReleases: [NewReleaseData] = [
-        NewReleaseData(
-            albumCover: "benson boone",
-            artistName: "Benson Boone",
-            albumDescription: "A soulful journey through modern pop with heartfelt lyrics and captivating melodies that resonate with listeners across all generations and musical preferences",
-            trackThumbnail: "benson boone",
-            trackTitle: "Beautiful Things",
-            trackSubtitle: "Beautiful Things",
-            releaseDate: "15 Jul 2025",
-            artistPhoto: "teddy swims"
-        ),
-        NewReleaseData(
-            albumCover: "saint levant",
-            artistName: "Saint Levant",
-            albumDescription: "He knows love isn't just emotion — it's politics, heritage, and resistance; this bilingual confessional blends spoken-word poetry with contemporary beats to create a powerful narrative of cultural identity and personal growth",
-            trackThumbnail: "saint levant",
-            trackTitle: "رسائلأ غنيةأغنية جديدة حب",
-            trackSubtitle: "Love Letters",
-            releaseDate: "29 Jun 2025",
-            artistPhoto: "benson boone"
-        ),
-        NewReleaseData(
-            albumCover: "blur",
-            artistName: "Blur",
-            albumDescription: "Classic British rock with innovative soundscapes and timeless hits that defined a generation of music lovers and continue to influence contemporary artists worldwide",
-            trackThumbnail: "blur",
-            trackTitle: "Song 2",
-            trackSubtitle: "Song 2",
-            releaseDate: "22 Jul 2025",
-            artistPhoto: "pixies"
-        ),
-        NewReleaseData(
-            albumCover: "cure",
-            artistName: "The Cure",
-            albumDescription: "Gothic rock masterpiece with haunting melodies and introspective lyrics that continue to inspire artists today and remain a cornerstone of alternative music culture",
-            trackThumbnail: "cure",
-            trackTitle: "Friday I'm in Love",
-            trackSubtitle: "Friday I'm in Love",
-            releaseDate: "30 Jul 2025",
-            artistPhoto: "my bloody valentine"
-        ),
-        NewReleaseData(
-            albumCover: "aquarium",
-            artistName: "Aquarium",
-            albumDescription: "Experimental electronic sounds with ambient textures",
-            trackThumbnail: "aquarium",
-            trackTitle: "Equinox",
-            trackSubtitle: "Equinox",
-            releaseDate: "05 Aug 2025",
-            artistPhoto: "Wegz 3"
-        )
-    ]
+    @EnvironmentObject private var overflowMenuState: OverflowMenuState
+    @EnvironmentObject private var curationManager: ContentCurationManager
+
+    private var newReleases: [NewReleaseData] {
+        curationManager.newReleases
+    }
     
     var body: some View {
         ZStack {
@@ -74,16 +27,25 @@ struct TrendsShowcase: View {
                     NewReleaseCarousel(
                         releases: newReleases,
                         onReleaseTap: { release in
-                            // Navigate to album screen
-                            selectedAlbum = release.trackTitle
-                            navigateToAlbum = true
+                            selectedNewRelease = release
                         },
                         onLike: { release in
-                            collectionState.registerLike(coverName: release.albumCover)
+                            collectionState.registerLike(coverName: release.albumCover, coverURL: release.albumCoverURL)
                         },
                         onPlay: { release in
                             // Handle play action - could start playing the track
                             print("Playing release: \(release.artistName)")
+                        },
+                        onLongPress: { release in
+                            overflowMenuState.present(.album(
+                                title: release.trackTitle,
+                                artistName: release.artistName,
+                                releaseYear: release.parsedReleaseYear ?? 2025,
+                                coverImageName: release.albumCover,
+                                artistImageName: release.artistPhoto,
+                                coverImageURL: release.albumCoverURL,
+                                artistImageURL: release.artistThumbnailURL ?? release.artistPhotoURL
+                            ))
                         }
                     )
                     
@@ -95,12 +57,12 @@ struct TrendsShowcase: View {
                             PlaylistCard(imageName: "EveningAzkar", onTap: {}),
                             PlaylistCard(imageName: "Anasheed", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
                             navigateToPlayer = true
                         }
                     )
-                    
+
                     PlaylistCarousel(
                         title: "Rising Stars",
                         playlists: [
@@ -109,12 +71,12 @@ struct TrendsShowcase: View {
                             PlaylistCard(imageName: "MorningAzkar", onTap: {}),
                             PlaylistCard(imageName: "Ruqya", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
                             navigateToPlayer = true
                         }
                     )
-                    
+
                     PlaylistCarousel(
                         title: "Viral Hits",
                         playlists: [
@@ -123,12 +85,12 @@ struct TrendsShowcase: View {
                             PlaylistCard(imageName: "Anasheed", onTap: {}),
                             PlaylistCard(imageName: "Ruqya", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
                             navigateToPlayer = true
                         }
                     )
-                    
+
                     PlaylistCarousel(
                         title: "Chart Toppers",
                         playlists: [
@@ -137,8 +99,8 @@ struct TrendsShowcase: View {
                             PlaylistCard(imageName: "MorningAzkar", onTap: {}),
                             PlaylistCard(imageName: "EveningAzkar", onTap: {})
                         ],
-                        onPlaylistTap: { playlistName in
-                            selectedPlaylist = playlistName
+                        onPlaylistTap: { name in
+                            selectedPlaylist = name
                             navigateToPlayer = true
                         }
                     )
@@ -148,11 +110,17 @@ struct TrendsShowcase: View {
             }
             .background(Color.black)
         }
+        .task {
+            await curationManager.loadNewReleasesIfNeeded()
+        }
         .navigationDestination(isPresented: $navigateToPlayer) {
             Playlist(playlistName: selectedPlaylist)
         }
         .navigationDestination(isPresented: $navigateToAlbum) {
-            Album(albumName: selectedAlbum)
+            Album(albumName: selectedAlbumItem?.albumTitle, deezerAlbumId: selectedAlbumItem?.deezerAlbumId)
+        }
+        .navigationDestination(item: $selectedNewRelease) { release in
+            Album(newReleaseContext: release)
         }
     }
 }
@@ -160,4 +128,5 @@ struct TrendsShowcase: View {
 #Preview {
     TrendsShowcase()
         .environmentObject(CollectionState())
+        .environmentObject(OverflowMenuState())
 }

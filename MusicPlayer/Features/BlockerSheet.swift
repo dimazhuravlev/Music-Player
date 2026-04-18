@@ -13,7 +13,7 @@ struct BlockerSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var contentHeight: CGFloat = 0
     @State private var isAnimating = false
-    @StateObject private var gyro = GyroManager()
+    @ObservedObject private var gyro = GyroManager.shared
     
     var body: some View {
         VStack(spacing: 0) {
@@ -135,7 +135,7 @@ struct BlockerSheet: View {
         id: 1,
         title: "Taste",
         artist: "Uglymoss",
-        albumCover: "blur",
+        albumCover: "album",
         releaseYear: 2023
     ))
 }

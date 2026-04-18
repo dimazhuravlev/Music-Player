@@ -41,8 +41,9 @@ struct NavBar: View {
     let onSkipTap: (() -> Void)?
     let contentName: String?
     let contentImageName: String?
+    var contentImageURL: URL? = nil
     let scrollOffset: CGFloat
-    
+
     init(
         showBackButton: Bool = true,
         showSearchButton: Bool = true,
@@ -52,6 +53,7 @@ struct NavBar: View {
         onSkipTap: (() -> Void)? = nil,
         contentName: String? = nil,
         contentImageName: String? = nil,
+        contentImageURL: URL? = nil,
         scrollOffset: CGFloat = 0
     ) {
         self.showBackButton = showBackButton
@@ -62,6 +64,7 @@ struct NavBar: View {
         self.onSkipTap = onSkipTap
         self.contentName = contentName
         self.contentImageName = contentImageName
+        self.contentImageURL = contentImageURL
         self.scrollOffset = scrollOffset
     }
     
@@ -78,9 +81,7 @@ struct NavBar: View {
             // Left-aligned content with image and title
             if let contentName = contentName, let contentImageName = contentImageName {
                 HStack(spacing: 6) {
-                    Image(contentImageName)
-                        .resizable()
-                        .scaledToFill()
+                    CachedAsyncImage(url: contentImageURL, assetName: contentImageName)
                         .frame(width:40, height: 40)
                         .cornerRadius(6)
                         .clipped()

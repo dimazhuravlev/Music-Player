@@ -4,11 +4,13 @@ import SwiftUI
 struct TrackCarouselView: View {
     let tracks: [Track]
     let blurRadius: CGFloat
+    var onTrackLongPress: ((Track) -> Void)? = nil
     @State private var selectedTrack: Track?
-    
-    init(tracks: [Track], blurRadius: CGFloat = 0) {
+
+    init(tracks: [Track], blurRadius: CGFloat = 0, onTrackLongPress: ((Track) -> Void)? = nil) {
         self.tracks = tracks
         self.blurRadius = blurRadius
+        self.onTrackLongPress = onTrackLongPress
     }
     
     var body: some View {
@@ -17,9 +19,11 @@ struct TrackCarouselView: View {
                 ForEach(Array(tracks.chunked(into: 3).enumerated()), id: \.offset) { index, trackGroup in
                     VStack(spacing: 0) {
                         ForEach(trackGroup, id: \.id) { track in
-                            TrackRow(track: track, onTap: {
-                                selectedTrack = track
-                            })
+                            TrackRow(
+                                track: track,
+                                onTap: { selectedTrack = track },
+                                onLongPress: onTrackLongPress.map { h in { h(track) } }
+                            )
                         }
                     }
                     .frame(width: 360)

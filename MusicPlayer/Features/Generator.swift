@@ -1,6 +1,35 @@
 import SwiftUI
-import AVKit
+import UIKit
 import AVFoundation
+
+/// Renders video via `AVPlayerLayer` only — no `VideoPlayer` transport controls on tap.
+private struct ShaderVideoLayerView: UIViewRepresentable {
+    let player: AVPlayer
+
+    func makeUIView(context: Context) -> UIView {
+        let view = PlayerLayerContainerView()
+        view.playerLayer.player = player
+        view.playerLayer.videoGravity = .resizeAspectFill
+        view.backgroundColor = .clear
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        guard let view = uiView as? PlayerLayerContainerView else { return }
+        view.playerLayer.player = player
+        view.playerLayer.frame = view.bounds
+    }
+}
+
+private final class PlayerLayerContainerView: UIView {
+    override class var layerClass: AnyClass { AVPlayerLayer.self }
+    var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        playerLayer.frame = bounds
+    }
+}
 
 // Manages a shared shader player so it isn't recreated on every tab visit
 final class ShaderPlayerManager: ObservableObject {
@@ -42,6 +71,8 @@ final class ShaderPlayerManager: ObservableObject {
     
     func play() {
         prepareIfNeeded()
+        // Deferred so it runs after any synchronous pause() from the previous view's onDisappear
+        // in the same run loop (e.g. For You → Offline swap); otherwise pause can win after play.
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             self.player?.play()
@@ -50,14 +81,19 @@ final class ShaderPlayerManager: ObservableObject {
     }
     
     func pause() {
-        DispatchQueue.main.async { [weak self] in
-            self?.player?.pause()
+        if Thread.isMainThread {
+            player?.pause()
+        } else {
+            DispatchQueue.main.async { [weak self] in
+                self?.player?.pause()
+            }
         }
     }
 }
 
 struct VideoBackgroundView: View {
     @ObservedObject var shaderPlayer: ShaderPlayerManager
+    @EnvironmentObject private var offlineModeState: OfflineModeState
     let refreshOffset: CGFloat
     let isDragging: Bool
     @State private var isVisible: Bool = true
@@ -68,35 +104,48 @@ struct VideoBackgroundView: View {
             // Fallback background
             Color.black
                 .ignoresSafeArea()
-            
+
             // Video player - only show when visible and reduce resource usage
             if let player = shaderPlayer.player, isVisible {
-                VideoPlayer(player: player)
-                    .aspectRatio(1, contentMode: .fill)
-                    .frame(width: 300, height: 300)
-                    .clipped()
-                    .offset(
-                        x: 0,
-                        y: -120 - shaderOffset
-                    )
-                    .onChange(of: refreshOffset) { newValue in
-                        // Only update shader offset during active drag
-                        if isDragging {
-                            shaderOffset = newValue
+                // AVPlayerLayer uses a separate render path on device; tint must composite in the
+                // same SwiftUI group as the video (not full-screen), or blendMode sees the wrong
+                // backdrop and reads as a flat purple layer. Screenshots use a different composite.
+                ZStack {
+                    ShaderVideoLayerView(player: player)
+                        .aspectRatio(1, contentMode: .fill)
+
+                    if offlineModeState.isEnabled {
+                        Color(red: 163 / 255, green: 50 / 255, blue: 1)
+                            .blendMode(.color)
+                            .allowsHitTesting(false)
+                    }
+                }
+                .frame(width: 300, height: 300)
+                .clipped()
+                .compositingGroup()
+                .allowsHitTesting(false)
+                .offset(
+                    x: 0,
+                    y: -120 - shaderOffset
+                )
+                .onChange(of: refreshOffset) { newValue in
+                    // Only update shader offset during active drag
+                    if isDragging {
+                        shaderOffset = newValue
+                    }
+                }
+                .onChange(of: isDragging) { newValue in
+                    if !newValue {
+                        // When drag ends, smoothly return shader to base position
+                        withAnimation(.easeOut(duration: 0.3)) {
+                            shaderOffset = 0
                         }
                     }
-                    .onChange(of: isDragging) { newValue in
-                        if !newValue {
-                            // When drag ends, smoothly return shader to base position
-                            withAnimation(.easeOut(duration: 0.3)) {
-                                shaderOffset = 0
-                            }
-                        }
-                    }
-                    .ignoresSafeArea()
-                    .transaction { transaction in
-                        transaction.disablesAnimations = true
-                    }
+                }
+                .ignoresSafeArea()
+                .transaction { transaction in
+                    transaction.disablesAnimations = true
+                }
             }
         }
         .onAppear {
@@ -121,6 +170,7 @@ struct VideoBackgroundView: View {
 
 struct Generator: View {
     @ObservedObject var shaderPlayer: ShaderPlayerManager
+    @EnvironmentObject private var overflowMenuState: OverflowMenuState
     let tracks: [Track]
     let refreshOffset: CGFloat
     let blurRadius: CGFloat
@@ -133,7 +183,7 @@ struct Generator: View {
     @State private var isPlaying = false
     @State private var statusScale: CGFloat = 1.0
     
-    private let filters = ["Taylor Swift", "Energetic", "Assala Nasri", "Rock", "Pop", "Hip Hop", "Electronic", "Jazz", "Classical", "Indie", "R&B"]
+    private let filters = ["Post-Punk", "Shoegaze", "Noise Rock", "Post-Rock", "Hardcore", "Krautrock", "Art Rock", "Grunge", "IDM", "Dream Pop", "No Wave"]
     
     // Calculate opacity for refresh status based on pull distance
     private var refreshStatusOpacity: Double {
@@ -207,7 +257,7 @@ struct Generator: View {
                 refreshOffset: refreshOffset,
                 isDragging: !isRefreshing && refreshOffset > 0
             )
-            
+
             VStack(alignment: .leading, spacing: 8) {
             // Header with title and play button
             HStack {
@@ -261,7 +311,17 @@ struct Generator: View {
             
             // Track carousel with overlay status
             ZStack {
-                TrackCarouselView(tracks: tracks, blurRadius: blurRadius)
+                TrackCarouselView(tracks: tracks, blurRadius: blurRadius, onTrackLongPress: { track in
+                                    overflowMenuState.present(ShareableEntity(
+                                        title: track.title,
+                                        subtitle: track.artist,
+                                        year: track.releaseYear,
+                                        coverImageName: track.albumCover,
+                                        artistImageName: nil,
+                                        coverImageURL: track.albumCoverURL,
+                                        artistImageURL: track.artistThumbnailURL
+                                    ))
+                                })
                     .opacity(carouselOpacity)
                     .animation(.easeOut(duration: 0.3), value: isRefreshing)
                 
@@ -317,5 +377,6 @@ struct Generator: View {
         isRefreshing: false,
         refreshBlurRadius: 0
     )
+    .environmentObject(OverflowMenuState())
     .background(Color.black)
 }

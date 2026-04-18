@@ -5,98 +5,46 @@ struct GenreDefinition: Equatable {
     let genre: String
     let artists: [String]
     let backgroundCover: String
+    var deezerGenreId: Int? = nil
+    var artistImageURLs: [URL]? = nil
+    var backgroundCoverURL: URL? = nil
 }
 
 final class GenreCatalog {
     static let shared = GenreCatalog()
     let entries: [GenreDefinition]
     let fallback: GenreDefinition
-    
+
     private init() {
         entries = [
             GenreDefinition(
-                cardTitle: "Futuristic Beats Chasers",
-                genre: "Electronic",
-                artists: [
-                    "Marshmello",
-                    "David Guetta",
-                    "Tiësto",
-                    "Alan Walker",
-                    "Calvin Harris",
-                    "Avicii",
-                    "The Chainsmokers",
-                    "Kygo",
-                    "Zedd",
-                    "Martin Garrix"
-                ],
+                cardTitle: "Razor-Sharp Riffs",
+                genre: "Post-Hardcore",
+                artists: ["At The Drive-In", "Fugazi", "Refused", "Drive Like Jehu", "Unwound", "Shellac", "Quicksand", "Helmet", "Rites of Spring", "Embrace"],
                 backgroundCover: "1"
             ),
             GenreDefinition(
-                cardTitle: "El Scene Lovers",
-                genre: "Egyptian Hip-Hop",
-                artists: [
-                    "Wegz 1",
-                    "Marwan Moussa",
-                    "Lege-Cy",
-                    "Shehab",
-                    "Marwan Pablo",
-                    "3froto",
-                    "Molotof",
-                    "Abo El Anwar",
-                    "Sharmoofers",
-                    "Abyusif"
-                ],
+                cardTitle: "Bleak and Beautiful",
+                genre: "Post-Punk",
+                artists: ["Joy Division", "Bauhaus", "Siouxsie and the Banshees", "The Fall", "Wire", "Gang of Four", "Television", "Killing Joke", "The Chameleons", "Echo and the Bunnymen"],
                 backgroundCover: "2"
             ),
             GenreDefinition(
-                cardTitle: "Nile Romantic",
-                genre: "Egyptian Pop",
-                artists: [
-                    "Amr Diab",
-                    "Tamer Ashour",
-                    "Ramy Sabry",
-                    "Tamer Hosny",
-                    "Mohamed Hamaki",
-                    "Sherine",
-                    "Angham",
-                    "Ahmed Saad",
-                    "Ramy Gamal",
-                    "Bahaa Sultan"
-                ],
+                cardTitle: "Wall of Sound",
+                genre: "Shoegaze",
+                artists: ["My Bloody Valentine", "Slowdive", "Ride", "Cocteau Twins", "Lush", "Chapterhouse", "Swervedriver", "Pale Saints", "A Place to Bury Strangers", "Nothing"],
                 backgroundCover: "3"
             ),
             GenreDefinition(
-                cardTitle: "Sacred Soul Journey",
-                genre: "Spiritual",
-                artists: [
-                    "Abdul Rahman Al Sudais",
-                    "Mishary Rashid Alafasy",
-                    "Saad Al Ghamdi",
-                    "Abdul Basit Abdul Samad",
-                    "Muhammad Al Muqit",
-                    "Fares Abbad",
-                    "Abdullah Al Matrood",
-                    "Muhammad Ayyub",
-                    "Abdul Aziz Al Ahmad",
-                    "Muhammad Al Luhaidan"
-                ],
+                cardTitle: "Controlled Chaos",
+                genre: "Noise Rock",
+                artists: ["Sonic Youth", "Swans", "The Jesus Lizard", "Melvins", "Butthole Surfers", "Big Black", "Scratch Acid", "Unsane", "Brainiac", "Boredoms"],
                 backgroundCover: "4"
             ),
             GenreDefinition(
-                cardTitle: "The Gangnam Style",
-                genre: "K-Pop",
-                artists: [
-                    "BTS",
-                    "BLACKPINK",
-                    "Stray Kids",
-                    "Jungkook",
-                    "j-hope",
-                    "EXO",
-                    "TWICE",
-                    "The Rose",
-                    "ITZY",
-                    "IVE"
-                ],
+                cardTitle: "Burn It Down",
+                genre: "Hardcore Punk",
+                artists: ["Black Flag", "Bad Brains", "Minor Threat", "Dead Kennedys", "Hüsker Dü", "Converge", "Dag Nasty", "The Mars Volta", "Nick Cave", "Suicide"],
                 backgroundCover: "5"
             ),
             GenreDefinition(
@@ -106,176 +54,53 @@ final class GenreCatalog {
                 backgroundCover: "6"
             ),
             GenreDefinition(
-                cardTitle: "World's Hits Collector",
-                genre: "International Pop",
-                artists: [
-                    "Billie Eilish",
-                    "Coldplay",
-                    "Lady Gaga",
-                    "Ariana Grande",
-                    "Ed Sheeran",
-                    "Lana Del Rey",
-                    "Adele",
-                    "Imagine Dragons",
-                    "Selena Gomez",
-                    "Bruno Mars"
-                ],
+                cardTitle: "Endless Horizons",
+                genre: "Post-Rock",
+                artists: ["Godspeed You! Black Emperor", "Mogwai", "Slint", "Tortoise", "Explosions in the Sky", "Sigur Ros", "Bark Psychosis", "Talk Talk", "Mono", "Do Make Say Think"],
                 backgroundCover: "7"
             ),
             GenreDefinition(
-                cardTitle: "Shami Mood",
-                genre: "Levant Pop",
-                artists: [
-                    "Elissa",
-                    "Assala Nasri",
-                    "Nassif Zeytoun",
-                    "Al Shami",
-                    "Nancy Ajram",
-                    "Fadel Chaker",
-                    "Wael Jassar",
-                    "Carole Samaha",
-                    "Wael Kfoury",
-                    "Fairuz"
-                ],
+                cardTitle: "Motorik Dreams",
+                genre: "Krautrock",
+                artists: ["CAN", "Neu!", "Faust", "Tangerine Dream", "Cluster", "Popol Vuh", "Amon Düül II", "This Heat", "Radiohead", "King Crimson"],
                 backgroundCover: "8"
             ),
             GenreDefinition(
-                cardTitle: "Rebellious Streetlife Energy",
-                genre: "International Hip-Hop",
-                artists: [
-                    "Drake",
-                    "Travis Scott",
-                    "Post Malone",
-                    "Kendrick Lamar",
-                    "Kanye West",
-                    "Eminem",
-                    "Nicky Minaj",
-                    "Lil Nas X",
-                    "Doja Cat",
-                    "21 Savage"
-                ],
+                cardTitle: "Dark Anthems",
+                genre: "Gothic Rock",
+                artists: ["Bauhaus", "The Sisters of Mercy", "Siouxsie and the Banshees", "The Birthday Party", "Red Lorry Yellow Lorry", "Einstürzende Neubauten", "Tuxedomoon", "The Pop Group", "Pere Ubu", "Nick Cave"],
                 backgroundCover: "9"
             ),
             GenreDefinition(
-                cardTitle: "Rouh Al Khaleej",
-                genre: "Khaleeji Pop",
-                artists: [
-                    "Ahlam",
-                    "Rashed Al-Majed",
-                    "Hussain Al Jassmi",
-                    "Nawal",
-                    "Abdul Majeed Abdullah",
-                    "Majid Al Mohandes",
-                    "Balqees",
-                    "Nabeel Shuail",
-                    "Rabeh Saqer",
-                    "Ayed"
-                ],
+                cardTitle: "No Compromise",
+                genre: "No Wave",
+                artists: ["Sonic Youth", "Swans", "Glenn Branca", "DNA", "Mars", "Suicide", "Television", "The Jesus and Mary Chain", "A Place to Bury Strangers", "Interpol"],
                 backgroundCover: "10"
             ),
             GenreDefinition(
-                cardTitle: "Nabd El Share3",
-                genre: "Levant Hip-Hop",
-                artists: [
-                    "The Synaptik",
-                    "Shabjdeed",
-                    "El Rass",
-                    "Bu Kolthoum",
-                    "Tamer Nafar",
-                    "DAM",
-                    "Blu Fiefer",
-                    "Autostrad",
-                    "El Far3i",
-                    "47 Soul"
-                ],
+                cardTitle: "British Melancholy",
+                genre: "Britpop & Alt",
+                artists: ["Blur", "The Smiths", "Pulp", "Suede", "Elastica", "The Verve", "Oasis", "The Stone Roses", "Happy Mondays", "Radiohead"],
                 backgroundCover: "11"
             ),
             GenreDefinition(
-                cardTitle: "MC Maghreb Khouya",
-                genre: "Moroccan Hip-Hop",
-                artists: [
-                    "Elgrandetoto",
-                    "Don Bigg",
-                    "Dizzy DROS",
-                    "LFERDA",
-                    "Tagne",
-                    "Stormy",
-                    "Lbenj",
-                    "7-TOUN",
-                    "Mr Draganov",
-                    "Muslim"
-                ],
+                cardTitle: "Machine Music",
+                genre: "IDM & Electronic",
+                artists: ["Aphex Twin", "Autechre", "Boards of Canada", "Squarepusher", "CAN", "Tangerine Dream", "Cluster", "Neu!", "Faust", "Mogwai"],
                 backgroundCover: "12"
             ),
             GenreDefinition(
-                cardTitle: "The Modern Swagger",
-                genre: "Khaleeji Hip-Hop",
-                artists: [
-                    "Freek",
-                    "Flipperachi",
-                    "Blvxb",
-                    "Klash",
-                    "DJMubarak",
-                    "Daffy",
-                    "Asayel",
-                    "Nadine El Roubi",
-                    "Dafencii",
-                    "Queen G"
-                ],
+                cardTitle: "Desert Frequencies",
+                genre: "Arabic Jazz",
+                artists: ["Anouar Brahem", "Dhafer Youssef", "Rabih Abou-Khalil", "Grazhdanskaya Oborona", "King Crimson", "The Fall", "Wire", "Gang of Four", "This Heat", "Bark Psychosis"],
                 backgroundCover: "1"
             ),
-            GenreDefinition(
-                cardTitle: "Mahraganat Gamda",
-                genre: "Egyptian Mahraganat",
-                artists: [
-                    "Essam Saasa",
-                    "Eslam Kabonga",
-                    "Hamo Bika",
-                    "Ziad Zaza",
-                    "Team Elabda3",
-                    "Houda Bondok",
-                    "Magdy Elzahar",
-                    "Hamo Eltekha",
-                    "3enba",
-                    "Ahmed Moza"
-                ],
-                backgroundCover: "2"
-            ),
-            GenreDefinition(
-                cardTitle: "Dima Maghreb",
-                genre: "Moroccan Pop",
-                artists: [
-                    "Saad Lamjarred",
-                    "Douzi",
-                    "Hatim Ammor",
-                    "Asma Lmnawar",
-                    "Manal Benchlikha",
-                    "Ahmed Chawki",
-                    "Dounia Batma",
-                    "Lartiste",
-                    "Zouhair Bahaoui",
-                    "Aminux"
-                ],
-                backgroundCover: "3"
-            )
         ]
         fallback = GenreDefinition(
-            cardTitle: "World's Hits Collector",
-            genre: "International Pop",
-            artists: [
-                "Billie Eilish",
-                "Coldplay",
-                "Lady Gaga",
-                "Ariana Grande",
-                "Ed Sheeran",
-                "Lana Del Rey",
-                "Adele",
-                "Imagine Dragons",
-                "Selena Gomez",
-                "Bruno Mars"
-            ],
-            backgroundCover: "7"
+            cardTitle: "Razor-Sharp Riffs",
+            genre: "Post-Hardcore",
+            artists: ["Fugazi", "At The Drive-In", "Refused", "Drive Like Jehu", "Unwound", "Shellac", "Quicksand", "Helmet", "Rites of Spring", "Embrace"],
+            backgroundCover: "1"
         )
     }
 }
-
