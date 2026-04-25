@@ -21,9 +21,15 @@ struct MusicApp: App {
     }
 }
 
+/// Состояние глобальной дебаг-шторки (открытие из Wizard и т.п.).
+final class DebugPanelState: ObservableObject {
+    @Published var isPresented = false
+}
+
 struct AppRootView: View {
     @StateObject private var toastManager = ToastManager.shared
     @StateObject private var gyroManager = GyroManager.shared
+    @StateObject private var debugPanelState = DebugPanelState()
     @StateObject private var showcaseNavState = ShowcaseNavState()
     @StateObject private var shareOverlayState = ShareOverlayState()
     @StateObject private var overflowMenuState = OverflowMenuState()
@@ -31,7 +37,7 @@ struct AppRootView: View {
     @StateObject private var collectionState = CollectionState()
     @StateObject private var offlineModeState = OfflineModeState()
     @StateObject private var curationManager = ContentCurationManager.shared
-    
+
     init() {
         let initialIndex = GridIndex(x: 0, y: 0)
         let tracks = ContentCurationManager.shared.curatedTracks
@@ -56,6 +62,7 @@ struct AppRootView: View {
                 .preferredColorScheme(.dark)
         }
         .environmentObject(gyroManager)
+        .environmentObject(debugPanelState)
         .environmentObject(showcaseNavState)
         .environmentObject(shareOverlayState)
         .environmentObject(overflowMenuState)
@@ -126,10 +133,15 @@ struct MainContentView: View {
     @State private var offlineFlashColoredBlobsOpacity: CGFloat = 0.45
     @State private var suppressOfflineDisableSideEffects = false
     @State private var offlineFlashTask: Task<Void, Never>?
+    /// Монотонно растёт при старте любой offline-вспышки. Отменённые задачи сверяют свою локальную копию перед тем, как трогать общее состояние — иначе пробуждение из `Task.sleep` после cancel успевает зареcетить уже стартовавшую противоположную вспышку.
+    @State private var offlineFlashEpoch: UInt64 = 0
     @State private var offlineFlashHapticEngine: CHHapticEngine?
     @State private var offlineFlashHapticPlayer: CHHapticPatternPlayer?
-    /// Set to `.classic` to use `BottomBar` + original `MiniPlayer` behavior.
-    private let bottomBarStyle: BottomBarStyle = .v2
+    /// `false` — BottomBar V2 + MiniPlayer V2; `true` — классический BottomBar + MiniPlayer (дебаг из шторки по shake).
+    @AppStorage("debug_legacy_bottom_bar") private var useLegacyBottomBar = false
+    private var bottomBarStyle: BottomBarStyle {
+        useLegacyBottomBar ? .classic : .v2
+    }
     /// Зум витрины Offline (0.9→1) при входе по вспышке; завершается вместе с исчезновением оверлея.
     @State private var offlineShowcaseEntranceScale: CGFloat = 1
     /// Мини + лейбл Offline: 0 = +32 pt / opacity 0 при редиректе; 1 — финал; та же `.smooth` и длительность, что и скейл витрины.
@@ -138,45 +150,17 @@ struct MainContentView: View {
     @State private var onlineCollectionBottomChromeEntrance: CGFloat = 1
     /// Зум вкладки Downloads (0.9→1) при выходе из offline по вспышке; старт и длительность как у скейла витрины Offline (`offlineShowcaseEntranceScaleAnimationDuration`).
     @State private var downloadsEntranceScale: CGFloat = 1
-    /// Тёмный слой под скелетон-шторкой: только fade, без сдвига; появляется с короткой задержкой после открытия.
-    @State private var skeletonOfflineScrimReveal: CGFloat = 0
-    @State private var skeletonOfflineScrimTask: Task<Void, Never>?
-    /// Дополнительный сдвиг шторки вверх при оттягивании (≤ 0).
-    @State private var skeletonOfflineSheetDragTranslation: CGFloat = 0
-    /// После коммита в офлайн: не обновлять drag из жеста (иначе translation снова тянет шторку после сброса в 0 — дрожание).
-    @State private var skeletonOfflineSheetDragLocked = false
-    /// Порог оттягивания шторки вверх (pt) для перехода в офлайн.
-    private static let skeletonOfflineDragThreshold: CGFloat = 40
-    /// Длительность `withAnimation(.smooth)` при открытии шторки (`AlbumSkeletonScreen`).
-    private static let skeletonSheetEntranceAnimationSeconds: TimeInterval = 0.65
-    /// Пауза после приезда шторки, затем появление тёмного фона (opacity).
-    private static let skeletonOfflineScrimAfterSheetDelaySeconds: TimeInterval = 0.1
-    private static let skeletonOfflineScrimFadeInDuration: TimeInterval = 0.32
-
-    /// Высота шторки: ~92% экрана + нижний safe area, чтобы фон доходил до физического низа без чёрной щели.
-    private func skeletonOfflineSheetHeight(safeBottom: CGFloat) -> CGFloat {
-        #if canImport(UIKit)
-        min(UIScreen.main.bounds.height * 0.92 + safeBottom, UIScreen.main.bounds.height)
-        #else
-        700
-        #endif
-    }
-
+    /// Флаг маунта пятна верхнего хедера Offline. Управляется только из `withAnimation` — `.transition` делает opacity+16pt offset сверху вниз, длительность та же, что у скейла витрины.
+    @State private var isOfflineHeaderGlowVisible: Bool = false
     init() {
         // Initialize pendingTab to match selectedTab
         _pendingTab = State(initialValue: 0)
     }
 
-    /// Go Offline / жест вверх: сначала вспышка на текущем экране; `isEnabled` и редирект на корень витрины — под оверлеем (см. `runOfflineFlashTransition(skeletonSheetFlash:)`).
+    /// Go Offline: сначала вспышка на текущем экране; `isEnabled` и редирект на корень витрины — под оверлеем (см. `runOfflineFlashTransition(skeletonSheetFlash:)`).
     private func commitSkeletonOfflineTransition() {
         guard !offlineModeState.isEnabled else { return }
         guard !offlineFlashRunning else { return }
-        skeletonOfflineSheetDragLocked = true
-        var dragTxn = Transaction()
-        dragTxn.animation = nil
-        withTransaction(dragTxn) {
-            skeletonOfflineSheetDragTranslation = 0
-        }
         #if os(iOS)
         UIImpactFeedbackGenerator(style: .medium).impactOccurred(intensity: 0.85)
         #endif
@@ -188,6 +172,7 @@ struct MainContentView: View {
         guard offlineFlashRunning else { return 1 }
         return offlineFlashVisualOpacity > 0 ? Double(offlineFlashVisualOpacity) : 1
     }
+
 
     var body: some View {
         ZStack {
@@ -262,16 +247,31 @@ struct MainContentView: View {
                         activeTab: $activeAppTab,
                         current: $playerGridIndex
                     )
+                    .ignoresSafeArea()
                     .background(Color.black)
                 }
             }
             
-            if offlineModeState.isEnabled,
-               activeAppTab == .showcase,
-               !showcaseNavState.isShowingDetail {
-                OfflineHeaderGlow(
-                    intensity: offlineModeState.headerGlowOpacity * offlineHeaderGlowVisualFactor
-                )
+            // Z-order для showcase + offline:
+            //   1) `TopNavBarBackground` — тёмный градиент + два VariableBlurView (низ)
+            //   2) `OfflineHeaderGlow` — свечение под навбаром (поверх градиент-блера)
+            //   3) `TopNavBar(showsBackground: false)` — заголовок «Offline», тоггл, аватарка (поверх свечения)
+            // Для не-offline витрины TopNavBar остаётся со встроенным фоном (свечения нет).
+            if activeAppTab == .showcase, !showcaseNavState.isShowingDetail, offlineModeState.isEnabled {
+                TopNavBarBackground()
+            }
+
+            // Пятно монтируется условно — entrance/exit через `.transition` с opacity и 16pt offset (сверху вниз).
+            // Мутации `isOfflineHeaderGlowVisible` всегда обёрнуты в `withAnimation(.smooth(duration: showcaseScaleDuration))` — та же длительность, что у скейла витрины/таббара.
+            if isOfflineHeaderGlowVisible {
+                OfflineHeaderGlow()
+                    .transition(
+                        .asymmetric(
+                            insertion: .offset(y: -16).combined(with: .opacity),
+                            removal: .offset(y: -16).combined(with: .opacity)
+                        )
+                    )
+                    .allowsHitTesting(false)
             }
 
             // Fixed top navbar that stays in place during navigation
@@ -283,7 +283,8 @@ struct MainContentView: View {
                             selectedTab: .constant(0),
                             tabs: ["Offline"],
                             onRequestDisableOffline: { runOfflineExitTransition() },
-                            isOfflineExitFlashActive: offlineFlashRunning && offlineFlashReverse
+                            isOfflineExitFlashActive: offlineFlashRunning && offlineFlashReverse,
+                            showsBackground: false
                         )
                     } else {
                         TopNavBar(selectedTab: $selectedTab)
@@ -331,57 +332,20 @@ struct MainContentView: View {
             }
             
         }
-        .overlay(alignment: .bottom) {
-            GeometryReader { geo in
-                let h = skeletonOfflineSheetHeight(safeBottom: geo.safeAreaInsets.bottom)
-                let sheetH = min(h, geo.size.height)
-                let scrimOpacity: CGFloat = 0.2
-                ZStack(alignment: .bottom) {
-                    Color.black.opacity(scrimOpacity * skeletonOfflineScrimReveal)
-                        .ignoresSafeArea(edges: .all)
-                        .frame(width: geo.size.width, height: geo.size.height)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            withAnimation(.smooth(duration: 0.65)) {
-                                offlineModeState.isSkeletonOfflineSheetPresented = false
-                            }
-                        }
-
-                    OfflineBottomSheet(
-                        isPresented: offlineModeState.isSkeletonOfflineSheetPresented,
-                        onGoOffline: { commitSkeletonOfflineTransition() },
-                        onDragChanged: { translation in
-                            guard offlineModeState.isSkeletonOfflineSheetPresented else { return }
-                            guard !skeletonOfflineSheetDragLocked else { return }
-                            guard !offlineFlashRunning else { return }
-                            guard !offlineModeState.isEnabled else { return }
-                            guard translation <= 0 else { return }
-                            skeletonOfflineSheetDragTranslation = translation
-                            if translation <= -Self.skeletonOfflineDragThreshold {
-                                commitSkeletonOfflineTransition()
-                            }
+        .overlay {
+            Group {
+                if offlineModeState.isSkeletonOfflineSheetPresented {
+                    OfflinePromptLayer(
+                        onDismiss: {
+                            offlineModeState.isSkeletonOfflineSheetPresented = false
                         },
-                        onDragEnded: { translation in
-                            guard !skeletonOfflineSheetDragLocked else { return }
-                            guard !offlineModeState.isEnabled else { return }
-                            guard offlineModeState.isSkeletonOfflineSheetPresented else { return }
-                            guard translation > -Self.skeletonOfflineDragThreshold else { return }
-                            withAnimation(.spring(response: 0.42, dampingFraction: 0.86)) {
-                                skeletonOfflineSheetDragTranslation = 0
-                            }
-                        }
+                        onGoOffline: { commitSkeletonOfflineTransition() }
                     )
-                    .frame(width: geo.size.width, height: sheetH)
-                    .offset(
-                        y: offlineModeState.isSkeletonOfflineSheetPresented
-                            ? skeletonOfflineSheetDragTranslation
-                            : sheetH
-                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(!offlineFlashRunning)
                 }
-                .allowsHitTesting(offlineModeState.isSkeletonOfflineSheetPresented && !offlineFlashRunning)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ignoresSafeArea(edges: .bottom)
         }
         .overlay {
             if offlineFlashRunning {
@@ -400,41 +364,6 @@ struct MainContentView: View {
                 .ignoresSafeArea()
             }
         }
-        .onChange(of: offlineModeState.isSkeletonOfflineSheetPresented) { _, shown in
-            skeletonOfflineScrimTask?.cancel()
-            skeletonOfflineScrimTask = nil
-            if shown {
-                skeletonOfflineSheetDragLocked = false
-                var dragTxn = Transaction()
-                dragTxn.animation = nil
-                withTransaction(dragTxn) {
-                    skeletonOfflineSheetDragTranslation = 0
-                }
-                skeletonOfflineScrimReveal = 0
-                skeletonOfflineScrimTask = Task { @MainActor in
-                    let delaySeconds =
-                        Self.skeletonSheetEntranceAnimationSeconds
-                        + Self.skeletonOfflineScrimAfterSheetDelaySeconds
-                    try? await Task.sleep(
-                        nanoseconds: UInt64(delaySeconds * 1_000_000_000)
-                    )
-                    guard !Task.isCancelled, offlineModeState.isSkeletonOfflineSheetPresented else { return }
-                    withAnimation(.easeOut(duration: Self.skeletonOfflineScrimFadeInDuration)) {
-                        skeletonOfflineScrimReveal = 1
-                    }
-                }
-            } else {
-                skeletonOfflineSheetDragLocked = false
-                var dragTxn = Transaction()
-                dragTxn.animation = nil
-                withTransaction(dragTxn) {
-                    skeletonOfflineSheetDragTranslation = 0
-                }
-                withAnimation(.easeOut(duration: 0.2)) {
-                    skeletonOfflineScrimReveal = 0
-                }
-            }
-        }
         .onChange(of: offlineModeState.isEnabled) { _, enabled in
             if !enabled {
                 if suppressOfflineDisableSideEffects {
@@ -445,6 +374,9 @@ struct MainContentView: View {
                 withAnimation(.easeOut(duration: 0.38)) {
                     offlineModeState.headerGlowOpacity = 0
                 }
+                withAnimation(.smooth(duration: Self.offlineShowcaseEntranceScaleAnimationDuration)) {
+                    isOfflineHeaderGlowVisible = false
+                }
                 cancelOfflineFlashTransition()
                 return
             }
@@ -454,7 +386,8 @@ struct MainContentView: View {
                 offlineModeState.downloadsPullChromeProgress = 0
             }
             // Вспышка со шторки уже запущена до `isEnabled`; не дублировать и не выставлять glow здесь.
-            if offlineFlashRunning {
+            // При reverse-вспышке (выход) — наоборот: пропускаем вниз, чтобы `runOfflineFlashTransition()` отменил выход и начал свежий вход.
+            if offlineFlashRunning && !offlineFlashReverse {
                 var txn = Transaction()
                 txn.animation = nil
                 withTransaction(txn) {
@@ -464,6 +397,9 @@ struct MainContentView: View {
             }
             if activeAppTab == .showcase && !showcaseNavState.isShowingDetail {
                 offlineModeState.headerGlowOpacity = 1
+                withAnimation(.smooth(duration: Self.offlineShowcaseEntranceScaleAnimationDuration)) {
+                    isOfflineHeaderGlowVisible = true
+                }
                 return
             }
             // Вспышка всегда с `coverProgress` 0→1 (снизу вверх); хром после pull держится через `offlineTransitionChromeFloor`.
@@ -617,11 +553,11 @@ struct MainContentView: View {
     }
     
     /// Линейный проход `offlineFlashCover` 0→1.
-    private static let offlineFlashCoverDurationSeconds: TimeInterval = 1.54
+    private static let offlineFlashCoverDurationSeconds: TimeInterval = 1.62
     /// Доля `coverProgress` 0…1, при которой фоновый блоб уже закрыл весь кадр непрозрачным «телом» (`bgSolid` в OfflineFlash.metal). Редирект таба/режима — в этот момент (доля не менялась — та же относительная точка относительно фазы cover).
     private static let offlineFlashRedirectCoverProgress: TimeInterval = 0.55
     /// Финальное затухание: вся вспышка + зелёный слой + свечение хедера — opacity 1→0 за это время (линейно). Выход из offline: тот же интервал для `exitProgress` в шейдере.
-    private static let offlineFlashFinalFadeOutDurationSeconds: TimeInterval = 0.74
+    private static let offlineFlashFinalFadeOutDurationSeconds: TimeInterval = 0.78
     /// Пауза перед финальным fade (сек) — совпадает с `Task.sleep` в `runOfflineFlashTransition`.
     private static let offlineFlashPreFinalFadePauseSeconds: TimeInterval = 9.2e-3
     /// Суммарное время фазы свечения (cover → пауза → финальный fade) — для длительности скейла витрины.
@@ -657,6 +593,8 @@ struct MainContentView: View {
     /// - Parameter skeletonSheetFlash: шторка скелетона — pop + `isEnabled` под оверлеем; короткая пауза перед редиректом под сброс навигации.
     private func runOfflineFlashTransition(skeletonSheetFlash: Bool = false) {
         cancelOfflineFlashTransition()
+        offlineFlashEpoch &+= 1
+        let epoch = offlineFlashEpoch
         offlineFlashRunning = true
         offlineFlashCover = 0
         offlineFlashExitProgress = 0
@@ -669,8 +607,9 @@ struct MainContentView: View {
         withTransaction(prep) {
             offlineModeState.headerGlowOpacity = 0
             offlineFlashReverse = false
+            isOfflineHeaderGlowVisible = false
         }
-        
+
         let coverDuration = Self.offlineFlashCoverDurationSeconds
         let finalFadeDuration = Self.offlineFlashFinalFadeOutDurationSeconds
         let redirectAt = min(max(Self.offlineFlashRedirectCoverProgress, 0.05), 0.95)
@@ -683,7 +622,7 @@ struct MainContentView: View {
         let overlayOffAfterZoomStartNs = UInt64(overlayOffAfterZoomStart * 1_000_000_000)
         let zoomTailAfterOverlaySeconds = max(0, zoomStartDelaySeconds + showcaseScaleDuration - cleanupTotalSeconds)
         let zoomTailAfterOverlayNs = UInt64(zoomTailAfterOverlaySeconds * 1_000_000_000)
-        
+
         // linear: равномерный `coverProgress` — иначе easeOut даёт «быстро улетело — потом ползём» и визуальную остановку.
         withAnimation(.linear(duration: coverDuration)) {
             offlineFlashCover = 1
@@ -691,13 +630,15 @@ struct MainContentView: View {
         playOfflineFlashHapticSequence(coverDuration: coverDuration)
         
         offlineFlashTask = Task { @MainActor in
-            defer { offlineFlashTask = nil }
+            defer {
+                if offlineFlashEpoch == epoch { offlineFlashTask = nil }
+            }
             let skeletonPrepNs: UInt64 = 7_700_000
             if skeletonSheetFlash {
                 let firstSleepNs = redirectDelayNs > skeletonPrepNs ? redirectDelayNs - skeletonPrepNs : 0
                 try? await Task.sleep(nanoseconds: firstSleepNs)
                 guard !Task.isCancelled else {
-                    abortOfflineFlashAndGlow()
+                    abortOfflineFlashAndGlowIfCurrent(epoch)
                     return
                 }
                 // Сначала сбросить навигацию на корень For You (пока ещё смонтирован), иначе `isEnabled` заменит
@@ -710,7 +651,7 @@ struct MainContentView: View {
                 }
                 try? await Task.sleep(nanoseconds: skeletonPrepNs)
                 guard !Task.isCancelled else {
-                    abortOfflineFlashAndGlow()
+                    abortOfflineFlashAndGlowIfCurrent(epoch)
                     return
                 }
                 await performDeferredOfflineNavigationRedirect {
@@ -724,15 +665,16 @@ struct MainContentView: View {
                 withAnimation(.smooth(duration: showcaseScaleDuration)) {
                     offlineShowcaseEntranceScale = 1
                     offlineShowcaseBottomChromeEntrance = 1
+                    isOfflineHeaderGlowVisible = true
                 }
             } else {
                 try? await Task.sleep(nanoseconds: redirectDelayNs)
                 guard !Task.isCancelled else {
-                    abortOfflineFlashAndGlow()
+                    abortOfflineFlashAndGlowIfCurrent(epoch)
                     return
                 }
                 guard offlineModeState.isEnabled else {
-                    abortOfflineFlashAndGlow()
+                    abortOfflineFlashAndGlowIfCurrent(epoch)
                     return
                 }
                 await performDeferredOfflineNavigationRedirect {
@@ -744,18 +686,19 @@ struct MainContentView: View {
                 withAnimation(.smooth(duration: showcaseScaleDuration)) {
                     offlineShowcaseEntranceScale = 1
                     offlineShowcaseBottomChromeEntrance = 1
+                    isOfflineHeaderGlowVisible = true
                 }
             }
             try? await Task.sleep(nanoseconds: remainingCoverNs)
             guard !Task.isCancelled, offlineModeState.isEnabled else {
-                abortOfflineFlashAndGlow()
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             try? await Task.sleep(
                 nanoseconds: UInt64(Self.offlineFlashPreFinalFadePauseSeconds * 1_000_000_000)
             )
             guard !Task.isCancelled, offlineModeState.isEnabled else {
-                abortOfflineFlashAndGlow()
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             // Финальный fade: шейдер без exitProgress — затухание через opacity всего оверлея (включая зелёный слой); хедер синхронно.
@@ -764,7 +707,7 @@ struct MainContentView: View {
                 offlineModeState.headerGlowOpacity = 0
             }
             try? await Task.sleep(nanoseconds: UInt64(finalFadeDuration * 1_000_000_000))
-            if offlineModeState.isEnabled {
+            if offlineModeState.isEnabled, offlineFlashEpoch == epoch {
                 var glowTxn = Transaction()
                 glowTxn.animation = nil
                 withTransaction(glowTxn) {
@@ -773,21 +716,25 @@ struct MainContentView: View {
             }
             try? await Task.sleep(nanoseconds: UInt64(zoomStartDelaySeconds * 1_000_000_000))
             guard !Task.isCancelled, offlineModeState.isEnabled else {
-                abortOfflineFlashAndGlow()
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             try? await Task.sleep(nanoseconds: overlayOffAfterZoomStartNs)
             guard !Task.isCancelled, offlineModeState.isEnabled else {
-                abortOfflineFlashAndGlow()
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
-            resetOfflineFlashVisuals(resetEntranceScale: false)
+            if offlineFlashEpoch == epoch {
+                resetOfflineFlashVisuals(resetEntranceScale: false)
+            }
             try? await Task.sleep(nanoseconds: zoomTailAfterOverlayNs)
             guard !Task.isCancelled else {
-                abortOfflineFlashAndGlow()
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
-            resetOfflineFlashVisuals()
+            if offlineFlashEpoch == epoch {
+                resetOfflineFlashVisuals()
+            }
         }
     }
     
@@ -800,6 +747,8 @@ struct MainContentView: View {
         if offlineFlashRunning && offlineFlashReverse { return }
         // Входная вспышка ещё идёт — отменяем её и сразу запускаем выход (иначе тоггл «как будто» выключен, а режим остаётся).
         cancelOfflineFlashTransition()
+        offlineFlashEpoch &+= 1
+        let epoch = offlineFlashEpoch
         offlineFlashReverse = true
         offlineFlashRunning = true
         offlineFlashCover = 0
@@ -831,17 +780,23 @@ struct MainContentView: View {
         withAnimation(.linear(duration: coverDuration)) {
             offlineFlashCover = 1
         }
+        // Плавно увести пятно верхнего хедера синхронно с витриной/таббаром (та же `.smooth` и длительность, что у входного скейла).
+        withAnimation(.smooth(duration: Self.offlineShowcaseEntranceScaleAnimationDuration)) {
+            isOfflineHeaderGlowVisible = false
+        }
         playOfflineFlashHapticSequence(coverDuration: coverDuration)
-        
+
         offlineFlashTask = Task { @MainActor in
-            defer { offlineFlashTask = nil }
+            defer {
+                if offlineFlashEpoch == epoch { offlineFlashTask = nil }
+            }
             try? await Task.sleep(nanoseconds: redirectDelayNs)
             guard !Task.isCancelled else {
-                abortOfflineFlashAndGlow()
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             guard offlineModeState.isEnabled else {
-                abortOfflineFlashAndGlow()
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             suppressOfflineDisableSideEffects = true
@@ -858,16 +813,16 @@ struct MainContentView: View {
             }
             try? await Task.sleep(nanoseconds: remainingCoverNs)
             guard !Task.isCancelled else {
-                suppressOfflineDisableSideEffects = false
-                abortOfflineFlashAndGlow()
+                if offlineFlashEpoch == epoch { suppressOfflineDisableSideEffects = false }
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             try? await Task.sleep(
                 nanoseconds: UInt64(Self.offlineFlashPreFinalFadePauseSeconds * 1_000_000_000)
             )
             guard !Task.isCancelled else {
-                suppressOfflineDisableSideEffects = false
-                abortOfflineFlashAndGlow()
+                if offlineFlashEpoch == epoch { suppressOfflineDisableSideEffects = false }
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             withAnimation(.linear(duration: finalFadeDuration)) {
@@ -876,25 +831,29 @@ struct MainContentView: View {
             try? await Task.sleep(nanoseconds: UInt64(finalFadeDuration * 1_000_000_000))
             try? await Task.sleep(nanoseconds: UInt64(zoomStartDelaySeconds * 1_000_000_000))
             guard !Task.isCancelled else {
-                suppressOfflineDisableSideEffects = false
-                abortOfflineFlashAndGlow()
+                if offlineFlashEpoch == epoch { suppressOfflineDisableSideEffects = false }
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
             try? await Task.sleep(nanoseconds: overlayOffAfterZoomStartNs)
             guard !Task.isCancelled else {
-                suppressOfflineDisableSideEffects = false
-                abortOfflineFlashAndGlow()
+                if offlineFlashEpoch == epoch { suppressOfflineDisableSideEffects = false }
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
-            resetOfflineFlashVisuals(resetEntranceScale: false)
+            if offlineFlashEpoch == epoch {
+                resetOfflineFlashVisuals(resetEntranceScale: false)
+            }
             try? await Task.sleep(nanoseconds: zoomTailAfterOverlayNs)
             guard !Task.isCancelled else {
-                suppressOfflineDisableSideEffects = false
-                abortOfflineFlashAndGlow()
+                if offlineFlashEpoch == epoch { suppressOfflineDisableSideEffects = false }
+                abortOfflineFlashAndGlowIfCurrent(epoch)
                 return
             }
-            suppressOfflineDisableSideEffects = false
-            resetOfflineFlashVisuals()
+            if offlineFlashEpoch == epoch {
+                suppressOfflineDisableSideEffects = false
+                resetOfflineFlashVisuals()
+            }
         }
     }
     
@@ -908,9 +867,17 @@ struct MainContentView: View {
         withTransaction(t) {
             offlineModeState.headerGlowOpacity = 0
             offlineFlashVisualOpacity = 1
+            isOfflineHeaderGlowVisible = false
         }
         suppressOfflineDisableSideEffects = false
         resetOfflineFlashVisuals()
+    }
+
+    /// Abort только если это всё ещё наша вспышка (не перебита противоположной). Без этой проверки проснувшийся после `cancel()` старый Task затирал состояние свежестартовавшего — тоггл менял визуал, а переход не шёл.
+    @MainActor
+    private func abortOfflineFlashAndGlowIfCurrent(_ epoch: UInt64) {
+        guard offlineFlashEpoch == epoch else { return }
+        abortOfflineFlashAndGlow()
     }
 }
 

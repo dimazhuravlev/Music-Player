@@ -117,20 +117,27 @@ struct OverflowMenu: View {
 
     var body: some View {
         ZStack {
-            // Слой 1: фон + тап в пустоту закрывает.
+            // Фон + зерно рисуются в `.background` с ignoresSafeArea — не трогаем геометрию слоя с контентом (крестик и карточка в safe area).
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture { dismiss() }
-                .background(
+                .background {
                     ZStack {
                         Rectangle().fill(.ultraThinMaterial)
                         Rectangle().fill(Color.black.opacity(0.52))
+                        LowerHazeGrainOverlay(
+                            width: ModalOverlayScreenMetrics.width,
+                            height: ModalOverlayScreenMetrics.height,
+                            isPaused: blurOpacity < 0.02
+                        )
+                        .opacity(LowerHazeGrainLayerOpacity.modalScrim)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .opacity(blurOpacity)
                     .ignoresSafeArea()
-                )
+                }
 
-            // Слой 2: контент — реакции + карточка, вертикально по центру экрана.
+            // Контент — реакции + карточка, вертикально по центру (как до рефакторинга фона).
             VStack(spacing: 28) {
                 // Кнопки реакций над карточкой.
                 reactionRow
@@ -150,6 +157,7 @@ struct OverflowMenu: View {
                     .padding(.trailing, 16)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             openAnimSession += 1
             runOpenAnimation(session: openAnimSession)

@@ -36,9 +36,19 @@ struct OfflineFlashOverlay: View {
             ZStack {
                 Rectangle()
                     .fill(Self.lowerHazeFillColor)
+                    .frame(width: w, height: h)
+                    .colorEffect(
+                        ShaderLibrary.grainOverlay(
+                            .float2(w, h),
+                            .float(coverProgress)
+                        )
+                    )
+                    .compositingGroup()
+                    .drawingGroup(opaque: false)
                     .opacity(hazeOpacity)
                 Rectangle()
                     .fill(Color.white)
+                    .frame(width: w, height: h)
                     .colorEffect(
                         ShaderLibrary.offlineFlash(
                             .float2(w, h),

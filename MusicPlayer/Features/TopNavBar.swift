@@ -1,12 +1,14 @@
 import SwiftUI
 import VariableBlur
-import CoreHaptics
+#if canImport(UIKit)
+import UIKit
+#endif
 
 struct TopNavBar: View {
     @EnvironmentObject private var offlineModeState: OfflineModeState
+    @EnvironmentObject private var debugPanelState: DebugPanelState
     @Binding var selectedTab: Int
     @State private var pressedTabIndex: Int? = nil
-    @State private var hapticEngine: CHHapticEngine?
     @State private var previousSelectedTab: Int = 0
     @State private var showWizard = false
     /// Витрина Offline: визуальное состояние тоггла (модель `isEnabled` сбрасывается позже в анимации выхода).
@@ -17,17 +19,21 @@ struct TopNavBar: View {
     let onRequestDisableOffline: (() -> Void)?
     /// Идёт обратная вспышка выхода из офлайна — чтобы вернуть тоггл, если переход прервали.
     let isOfflineExitFlashActive: Bool
-    
+    /// `false` — не рендерить встроенный градиент+blur фон (когда снаружи нужно вставить слой между фоном и контентом, например, OfflineHeaderGlow).
+    let showsBackground: Bool
+
     init(
         selectedTab: Binding<Int>,
         tabs: [String] = ["For You", "Trends", "Spiritual"],
         onRequestDisableOffline: (() -> Void)? = nil,
-        isOfflineExitFlashActive: Bool = false
+        isOfflineExitFlashActive: Bool = false,
+        showsBackground: Bool = true
     ) {
         self._selectedTab = selectedTab
         self.tabs = tabs
         self.onRequestDisableOffline = onRequestDisableOffline
         self.isOfflineExitFlashActive = isOfflineExitFlashActive
+        self.showsBackground = showsBackground
     }
     
     var body: some View {
@@ -38,8 +44,7 @@ struct TopNavBar: View {
                         .font(.Headline3)
                         .foregroundColor(.fill1)
                     if let disableOffline = onRequestDisableOffline {
-                        Toggle(
-                            "",
+                        OfflineToggle(
                             isOn: Binding(
                                 get: { offlineHeaderToggleOn },
                                 set: { on in
@@ -47,11 +52,9 @@ struct TopNavBar: View {
                                     offlineHeaderToggleOn = false
                                     disableOffline()
                                 }
-                            )
+                            ),
+                            isEnabled: !isOfflineExitFlashActive
                         )
-                        .labelsHidden()
-                        .tint(Color.accent)
-                        .disabled(isOfflineExitFlashActive)
                     }
                 }
             } else {
@@ -66,7 +69,7 @@ struct TopNavBar: View {
                             .onTapGesture {
                                 selectedTab = index
                                 if index != previousSelectedTab {
-                                    playTabSwitchHaptic()
+                                    triggerTopTabHaptic()
                                 }
                                 previousSelectedTab = index
                             }
@@ -124,10 +127,44 @@ struct TopNavBar: View {
         .padding(.bottom, 8)
         .fullScreenCover(isPresented: $showWizard) {
             Wizard()
+                .environmentObject(debugPanelState)
         }
         .background {
-            ZStack {
-                // Dark gradient overlay for better contrast
+            if showsBackground {
+                TopNavBarBackground()
+            }
+        }
+        .onAppear {
+            if onRequestDisableOffline != nil {
+                offlineHeaderToggleOn = offlineModeState.isEnabled
+            }
+        }
+        .onChange(of: offlineModeState.isEnabled) { _, enabled in
+            guard onRequestDisableOffline != nil else { return }
+            offlineHeaderToggleOn = enabled
+        }
+        .onChange(of: isOfflineExitFlashActive) { _, active in
+            guard onRequestDisableOffline != nil else { return }
+            if !active && offlineModeState.isEnabled {
+                offlineHeaderToggleOn = true
+            }
+        }
+    }
+
+    private func triggerTopTabHaptic() {
+        #if canImport(UIKit)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        #endif
+    }
+}
+
+
+/// Тёмный градиент + два VariableBlurView сверху. Вынесено отдельно, чтобы можно было вставить слой между фоном и контентом TopNavBar (OfflineHeaderGlow).
+/// Самопозиционирующийся: верх контента анкорится к физическому верху экрана (через VStack + Spacer + `.ignoresSafeArea(edges: .top)`).
+struct TopNavBarBackground: View {
+    var body: some View {
+        VStack(spacing: 0) {
+            ZStack(alignment: .top) {
                 LinearGradient(
                     gradient: Gradient(
                         stops: [
@@ -147,86 +184,22 @@ struct TopNavBar: View {
                             Gradient.Stop(color: .black.opacity(0.12), location: 0.79),
                             Gradient.Stop(color: .black.opacity(0.05), location: 0.89),
                             Gradient.Stop(color: .black.opacity(0), location: 1.00),
-                            ]),
-                    startPoint: .top, 
+                        ]),
+                    startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: 130, alignment: .top)
-                .ignoresSafeArea()
-                
+                .frame(height: 130)
+
                 VariableBlurView(maxBlurRadius: 4, direction: .blurredTopClearBottom)
-                    .frame(height: 140, alignment: .top)
-                    .ignoresSafeArea()
-                
+                    .frame(height: 140)
+
                 VariableBlurView(maxBlurRadius: 14, direction: .blurredTopClearBottom)
-                    .frame(height: 100, alignment: .top)
-                    .ignoresSafeArea()
+                    .frame(height: 100)
             }
+            Spacer(minLength: 0)
         }
-        .onAppear {
-            setupHapticEngine()
-            if onRequestDisableOffline != nil {
-                offlineHeaderToggleOn = offlineModeState.isEnabled
-            }
-        }
-        .onChange(of: offlineModeState.isEnabled) { _, enabled in
-            guard onRequestDisableOffline != nil else { return }
-            offlineHeaderToggleOn = enabled
-        }
-        .onChange(of: isOfflineExitFlashActive) { _, active in
-            guard onRequestDisableOffline != nil else { return }
-            if !active && offlineModeState.isEnabled {
-                offlineHeaderToggleOn = true
-            }
-        }
-    }
-    
-    private func setupHapticEngine() {
-        do {
-            hapticEngine = try CHHapticEngine()
-            try hapticEngine?.start()
-            
-            // Handle engine stopping
-            hapticEngine?.stoppedHandler = { [weak hapticEngine] reason in
-                if reason == .audioSessionInterrupt || reason == .applicationSuspended {
-                    do {
-                        try hapticEngine?.start()
-                    } catch {
-                        print("Failed to restart haptic engine: \(error)")
-                    }
-                }
-            }
-        } catch {
-            print("Failed to create haptic engine: \(error)")
-        }
-    }
-    
-    private func playTabSwitchHaptic() {
-        guard let engine = hapticEngine else { return }
-        
-        do {
-            let parameters = [
-                CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.40),
-                CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.30),
-                CHHapticEventParameter(parameterID: .attackTime, value: 0.50),
-                CHHapticEventParameter(parameterID: .decayTime, value: 0.30),
-                CHHapticEventParameter(parameterID: .releaseTime, value: 0.60),
-                CHHapticEventParameter(parameterID: .sustained, value: 1)
-            ]
-            
-            let event = CHHapticEvent(
-                eventType: .hapticContinuous,
-                parameters: parameters,
-                relativeTime: 0,
-                duration: 0.30
-            )
-            
-            let pattern = try CHHapticPattern(events: [event], parameters: [])
-            let player = try engine.makePlayer(with: pattern)
-            try player.start(atTime: 0)
-        } catch {
-            print("Failed to play haptic: \(error)")
-        }
+        .ignoresSafeArea(edges: .top)
+        .allowsHitTesting(false)
     }
 }
 
@@ -235,5 +208,6 @@ struct TopNavBar: View {
     ZStack {
         TopNavBar(selectedTab: .constant(0))
             .environmentObject(OfflineModeState())
+            .environmentObject(DebugPanelState())
     }
 }

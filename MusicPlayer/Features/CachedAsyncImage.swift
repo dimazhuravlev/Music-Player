@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CachedAsyncImage: View {
     let url: URL?
@@ -18,7 +19,7 @@ struct CachedAsyncImage: View {
 
     @ViewBuilder
     private var content: some View {
-        if let image = displayedImage {
+        if let image = resolvedImage {
             Image(uiImage: image)
                 .resizable()
                 .aspectRatio(contentMode: contentMode)
@@ -28,13 +29,13 @@ struct CachedAsyncImage: View {
         }
     }
 
-    /// Reads synchronously from NSCache first so the correct image is available
-    /// in the same SwiftUI render pass — no 1-frame flash when the URL changes.
-    private var displayedImage: UIImage? {
-        if let url, let cached = ImageLoader.cache.object(forKey: url as NSURL) {
-            return cached
+    /// Remote image when available; otherwise a bundled asset (wizard avatars, placeholders).
+    private var resolvedImage: UIImage? {
+        if let url {
+            if let cached = ImageLoader.cache.object(forKey: url as NSURL) { return cached }
+            if let asyncImage { return asyncImage }
         }
-        return asyncImage
+        return UIImage(named: assetName)
     }
 }
 

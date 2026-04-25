@@ -103,24 +103,31 @@ private struct NewReleaseCardContent: View {
             let blurHeight = cardWidth * 0.78
             
             ZStack {
-                // Background: artist photo at top and mirrored version below
-                VStack(spacing: 0) {
-                    CachedAsyncImage(url: artistPhotoURL, assetName: artistPhoto)
-                        .frame(width: backgroundImageSize, height: backgroundImageSize)
-                        .clipped()
+                // Фон выше `cardHeight`; без отдельного frame+clip зерно центрируется по «высокому» ZStack и не доходит до низа видимой карты.
+                ZStack {
+                    VStack(spacing: 0) {
+                        CachedAsyncImage(url: artistPhotoURL, assetName: artistPhoto)
+                            .frame(width: backgroundImageSize, height: backgroundImageSize)
+                            .clipped()
 
-                    CachedAsyncImage(url: artistPhotoURL, assetName: artistPhoto)
-                        .frame(width: backgroundImageSize, height: backgroundImageSize)
-                        .clipped()
-                        .scaleEffect(x: -1, y: -1)
-                        .frame(width: backgroundImageSize, height: bottomBackgroundHeight, alignment: .top)
+                        CachedAsyncImage(url: artistPhotoURL, assetName: artistPhoto)
+                            .frame(width: backgroundImageSize, height: backgroundImageSize)
+                            .clipped()
+                            .scaleEffect(x: -1, y: -1)
+                            .frame(width: backgroundImageSize, height: bottomBackgroundHeight, alignment: .top)
+                    }
+
+                    VariableBlurView(maxBlurRadius: 28, direction: .blurredBottomClearTop)
+                        .frame(width: cardWidth, height: blurHeight)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
                 }
-                
-                // Gradient blur overlay
-                VariableBlurView(maxBlurRadius: 28, direction: .blurredBottomClearTop)
-                    .frame(width: cardWidth, height: blurHeight)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                
+                .frame(width: cardWidth, height: cardHeight, alignment: .bottom)
+                .clipped()
+                .overlay {
+                    LowerHazeGrainOverlay(width: cardWidth, height: cardHeight)
+                        .opacity(LowerHazeGrainLayerOpacity.newReleaseCard)
+                }
+
                 VStack(spacing: 0) {
                     // Artist info (artist name, description, divider)
                     VStack(alignment: .leading, spacing: 0) {

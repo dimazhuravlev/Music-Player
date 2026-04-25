@@ -101,20 +101,27 @@ struct ShareOverlay: View {
 
     var body: some View {
         ZStack {
-            // Слой 1: весь экран — тап закрывает; карточка выше по Z и перехватывает тачи только на себе.
+            // Фон в `.background` + ignoresSafeArea — контент остаётся в safe area (крестик и нижний блок на месте).
             Color.clear
                 .contentShape(Rectangle())
                 .onTapGesture { dismiss() }
-                .background(
+                .background {
                     ZStack {
                         Rectangle().fill(.ultraThinMaterial)
                         Rectangle().fill(Color.black.opacity(backgroundBlackLayerOpacity))
+                        LowerHazeGrainOverlay(
+                            width: ModalOverlayScreenMetrics.width,
+                            height: ModalOverlayScreenMetrics.height,
+                            isPaused: blurOpacity < 0.02
+                        )
+                        .opacity(LowerHazeGrainLayerOpacity.modalScrim)
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .opacity(blurOpacity)
                     .ignoresSafeArea()
-                )
+                }
 
-            // Слой 2: карточка по центру, блок «Share» снизу; при уводе карточки нижний блок гаснет/размывается.
+            // Карточка по центру, блок «Share» снизу; при уводе карточки нижний блок гаснет/размывается.
             VStack(spacing: 0) {
                 Spacer()
                 shareCardWithDrag
@@ -134,6 +141,7 @@ struct ShareOverlay: View {
                     .padding(.trailing, 16)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             openAnimSession += 1
             runOpenAnimation(session: openAnimSession)

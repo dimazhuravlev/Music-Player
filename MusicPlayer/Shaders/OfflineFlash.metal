@@ -30,7 +30,7 @@ static float bgSplatFalloff(float2 uv, float2 center, float baseR, float phase, 
                  + 0.034f * sin(ang * 19.0f - phase * 2.05f);
     float rEff = baseR * (1.0f + wobble);
     rEff = max(rEff, 0.09f);
-    float k = 3.42f;
+    float k = 3.05f;
     return exp(-pow(d / rEff, k));
 }
 
@@ -142,7 +142,7 @@ static float3 blobColorAt(int k,
     float bgMask = bgSplatFalloff(uv, bgCenter, bgR, splatPhase, size);
     // Гаусс почти никогда не даёт bgMask==1 — без буста alpha оверлея <1 и просвечивает UI. Нижний фон: непрозрачное перекрытие в «теле» блоба.
     // Важно: при смене `bgAnchorY` / `bgR` / stagger подправь `offlineFlashRedirectCoverProgress` в MusicApp (редирект под оверлеем).
-    float bgSolid = smoothstep(0.05f, 0.34f, bgMask);
+    float bgSolid = smoothstep(0.05f, 0.38f, bgMask);
     col = mix(col, cBg, bgSolid);
     flashMask = max(flashMask, bgSolid);
 
@@ -187,7 +187,7 @@ static float3 blobColorAt(int k,
     // Меньше waveSpeedMult — медленнее проход волны по c (полный ход позже, чем при 2.0).
     const float waveDelay = 0.30f;
     const float waveMid = 0.5f;
-    const float waveSpeedMult = 1.2f;
+    const float waveSpeedMult = 1.65f;
     float cProg = c;
     float waveSpan = 2.0f * max(waveMid - waveDelay, 0.01f);
     float waveT = clamp((cProg - waveDelay) * waveSpeedMult / waveSpan, 0.0f, 1.0f);
@@ -261,4 +261,45 @@ static float3 blobColorAt(int k,
     // col — как при композите на чёрном; premul rgb = col·exitFade, alpha = flashMask·exitFade (без второго умножения rgb на flashMask).
     float aOut = exitFade * flashMask;
     return half4(half3(col) * half(exitFade), half(aOut));
+}
+
+/// Зерно с мультипликативной модуляцией (`grainMulLo`/`grainMulHi`): паттерн читается даже на ярком сплошном fill.
+[[ stitchable ]] half4 grainOverlay(
+    float2 position,
+    half4 currentColor,
+    float2 size,
+    float coverProgress
+) {
+    (void)size;
+    float c = clamp(coverProgress, 0.0f, 1.0f);
+    float grain01 = surfaceGrain(position, c);
+    float g = pow(grain01, 1.2f);
+    const float grainStrength = 0.09f;
+    float3 grainTint = float3(1.0f, 0.99f, 0.965f);
+    half3 rgb = half3(currentColor.rgb) + half3(grainTint) * half(g * grainStrength);
+    const float grainMulLo = 0.94f;
+    const float grainMulHi = 1.06f;
+    float m = mix(grainMulLo, grainMulHi, g);
+    rgb = rgb * half(m);
+    rgb = clamp(rgb, half3(0.0f), half3(1.0f));
+    return half4(rgb, currentColor.a);
+}
+
+/// Soft-вариант: только additive, без мультипликативной ветки. Для оверлеев на фото/UI без лишнего затемнения.
+[[ stitchable ]] half4 grainOverlaySoft(
+    float2 position,
+    half4 currentColor,
+    float2 size,
+    float coverProgress
+) {
+    (void)size;
+    float c = clamp(coverProgress, 0.0f, 1.0f);
+    float grain01 = surfaceGrain(position, c);
+    // Чуть мягче гамма, чем у полного зерна (1.2), чтобы при screen-смешении зерно читалось сильнее.
+    float g = pow(grain01, 1.05f);
+    const float grainStrength = 0.14f;
+    float3 grainTint = float3(1.0f, 0.99f, 0.965f);
+    half3 rgb = half3(currentColor.rgb) + half3(grainTint) * half(g * grainStrength);
+    rgb = clamp(rgb, half3(0.0f), half3(1.0f));
+    return half4(rgb, currentColor.a);
 }

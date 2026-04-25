@@ -103,10 +103,20 @@ struct BottomBarV2: View {
         return 1
     }
 
-    /// При обратной вспышке выхода в онлайн фиксируем мини в онлайн-геометрии (без сдвига по `offlineChromeProgress`).
+    /// При обратной вспышке выхода в онлайн — без сдвига по `offlineChromeProgress`; подъём снизу задаётся тем же `onlineCollectionBottomChromeEntrance`, что и у таббара.
     private var miniChromeProgressForLayout: CGFloat {
         if isOnlineCollectionExitChromeEntrance { return 0 }
         return miniChromeProgress
+    }
+
+    private var miniPlayerEntranceOffsetY: CGFloat {
+        let showcaseLift = isOfflineShowcaseLayout
+            ? Self.offlineShowcaseChromeEntranceOffset * (1 - offlineShowcaseBottomChromeEntrance)
+            : 0
+        let collectionExitLift = isOnlineCollectionExitChromeEntrance
+            ? Self.offlineShowcaseChromeEntranceOffset * (1 - onlineCollectionBottomChromeEntrance)
+            : 0
+        return showcaseLift + collectionExitLift
     }
 
     // MARK: - Figma (375pt ref.)
@@ -117,15 +127,18 @@ struct BottomBarV2: View {
     /// Онлайн: inset ряда табов от safe-area (+8 pt к базовым 30 pt).
     private static let figmaTabsBottomInset: CGFloat = 38
     /// Сдвиг ряда табов вниз по мере офлайн-прогресса (pull / вспышка). Меньше макетных 80pt — иконки не уезжают так низко.
-    private static let figmaTabsSlideDown: CGFloat = 44
+    private static let figmaTabsSlideDown: CGFloat = 56
     /// Pull / не вспышка: таббар следует за прогрессом без сильного сглаживания.
     private static let tabBarSlideAnimationDuration: Double = 0.089
     /// Вход в offline по вспышке: таббар и мини опускаются в офлайн-позицию.
     private static let offlineEnterFlashChromeSlideDuration: TimeInterval = 1.0
-    /// Иконки 1→0 линейно по первым стольким долям `offlineChromeProgress`.
-    private static let tabBarFadeOutProgressEnd: CGFloat = 0.35
-    /// С этой доли pull (коллекция) линейно проявляется подсказка «Pull to go Offline» до opacity 1 к 100%.
-    private static let pullToOfflineHintOpacityStartProgress: CGFloat = tabBarFadeOutProgressEnd
+    /// Иконки 1→0 линейно по первым стольким долям `offlineChromeProgress` (больше — медленнее исчезновение при pull).
+    private static let tabBarFadeOutProgressEnd: CGFloat = 0.5
+    /// С этой доли pull (коллекция) линейно проявляется подсказка «Pull to go offline».
+    private static let pullToOfflineHintOpacityStartProgress: CGFloat = 0.32
+    /// Доля прогресса, в которой лейбл достигает финального положения и opacity=1 — совпадает с моментом срабатывания хаптика
+    /// (`Collection.downloadsPullProgressWhenMiniAtOfflineBottom = 1 / miniChromeProgressBoost`).
+    private static let pullToOfflineHintFullStateProgress: CGFloat = 1 / miniChromeProgressBoost
     /// Мини раньше доезжает до офлайн-позиции относительно того же оттяга (1 = как общий прогресс).
     private static let miniChromeProgressBoost: CGFloat = 1.18
     /// Лейбл: отступ снизу до текста; +4pt вверх — `offlineChromeVisualLift`.
@@ -136,24 +149,19 @@ struct BottomBarV2: View {
     private static let offlineShowcaseChromeEntranceOffset: CGFloat = 32
     /// Доп. подъём подсказки pull-to-offline относительно якоря офлайн-лейбла.
     private static let pullToOfflineHintExtraLift: CGFloat = 2
+    /// Опускает всю траекторию подсказки вниз (в т.ч. старт при p=0).
+    private static let pullToOfflineHintBaselineNudgeDown: CGFloat = 4
     /// Высота мини-плеера (см. `MiniPlayerV2.barHeight`).
     private static let miniPlayerBarHeight: CGFloat = 56
-    /// Pull-to-offline: блобы поднимаются снизу; при полном оттяге верх свечения — у верхнего края мини.
-    private static func downloadsPullBlobMistHeight(safeBottom: CGFloat) -> CGFloat {
-        safeBottom + figmaMiniBottomInsetOffline + miniPlayerBarHeight
-    }
 
-    /// Доп. подъём блобов по мере оттяга (0→32 pt снизу вверх, синхронно с `downloadsPullChromeProgress`).
-    private static let downloadsPullBlobProgressLift: CGFloat = 32
-    /// Смещение блобов вниз, чтобы при p=1 геометрический низ эллипсов был за нижним краем экрана (виден только размытый «хвост»).
-    private static let downloadsPullBlobBottomBleedDown: CGFloat = 96
-
-    /// При оттяге Downloads: лейбл «Pull to go Offline» поднимается снизу вверх на 0…12 pt по прогрессу.
+    /// При оттяге Downloads: лейбл «Pull to go offline» поднимается снизу вверх на 0…12 pt по прогрессу.
     private static let pullToOfflineHintPullLift: CGFloat = 12
     /// На полном оттяге опускает лейбл на 4 pt вниз относительно прежней верхней точки; растёт линейно с прогрессом.
     private static let pullToOfflineHintFinalNudgeDown: CGFloat = 4
     /// Variable blur + лёгкий градиент над ним (одинаковая высота).
     private static let chromeBottomMaterialHeight: CGFloat = 120
+    /// Размытие ряда табов по мере ухода вниз / fade (pull / вспышка).
+    private static let tabBarDismissBlurMax: CGFloat = 5
 
     private static let tabBarHorizontalPadding: CGFloat = 40
     private static let tabBarBottomInset: CGFloat = 24
@@ -183,22 +191,30 @@ struct BottomBarV2: View {
         return 1 - p / e
     }
 
-    /// Только коллекция + не офлайн: 0…1 между `pullToOfflineHintOpacityStartProgress` и полным оттягом.
+    /// Только коллекция + не офлайн: 0…1 между `pullToOfflineHintOpacityStartProgress` и точкой хаптика (`pullToOfflineHintFullStateProgress`).
     /// Только `downloadsPullChromeProgress` — не `offlineChromeProgress`: при вспышке выхода из офлайна тот же прогресс идёт 1→0 и ошибочно проявлял бы подсказку, пока таббар едет вверх.
     private var collectionPullToOfflineHintOpacity: CGFloat {
-        guard activeTab == .collection, !offlineModeState.isEnabled else { return 0 }
+        guard activeTab == .collection, !offlineModeState.isEnabled, offlineModeState.collectionTopTabIndex == 1 else { return 0 }
         let p = offlineModeState.downloadsPullChromeProgress
         let s = Self.pullToOfflineHintOpacityStartProgress
+        let f = Self.pullToOfflineHintFullStateProgress
         if p <= s { return 0 }
-        return min(1, (p - s) / (1 - s))
+        return min(1, (p - s) / max(0.001, f - s))
     }
 
-    /// Смещение по Y для подсказки pull-to-offline; сдвиг вниз к полному оттягу см. `pullToOfflineHintFinalNudgeDown`.
+    /// Смещение по Y для подсказки pull-to-offline; финальное положение достигается в точке хаптика (`pullToOfflineHintFullStateProgress`).
     private var pullToOfflineHintOffsetY: CGFloat {
         let p = offlineModeState.downloadsPullChromeProgress
-        return -Self.pullToOfflineHintPullLift * p
+        let q = min(1, p / Self.pullToOfflineHintFullStateProgress)
+        return -Self.pullToOfflineHintPullLift * q
             - Self.pullToOfflineHintExtraLift
-            + Self.pullToOfflineHintFinalNudgeDown * p
+            + Self.pullToOfflineHintFinalNudgeDown * q
+            + Self.pullToOfflineHintBaselineNudgeDown
+    }
+
+    private var tabBarDismissBlurRadius: CGFloat {
+        let o = min(1, max(0, tabBarOpacityWithOnlineExitEntrance))
+        return Self.tabBarDismissBlurMax * (1 - o)
     }
 
     /// Пока идёт fade, высота ряда полная — иначе clip съедает иконки до того, как они «угаснут».
@@ -251,6 +267,7 @@ struct BottomBarV2: View {
                         height: Self.tabBarRowLayoutHeight * tabBarLayoutHeightFactorWithOnlineExit,
                         alignment: .top
                     )
+                    .blur(radius: tabBarDismissBlurRadius)
                     .clipped()
                     .offset(y: (offlineChromeProgress < 1
                         ? Self.figmaTabsSlideDown * offlineChromeProgress
@@ -283,9 +300,7 @@ struct BottomBarV2: View {
                     .padding(.bottom, miniBottomPadding(safeBottom: safeBottom))
                     .offset(
                         y: -Self.offlineChromeVisualLift * miniChromeProgressForLayout
-                            + (isOfflineShowcaseLayout
-                                ? Self.offlineShowcaseChromeEntranceOffset * (1 - offlineShowcaseBottomChromeEntrance)
-                                : 0)
+                            + miniPlayerEntranceOffsetY
                     )
                     .opacity(Double(miniPlayerOpacity))
                     // Иначе `.animation(..., value: activeTab)` на ZStack интерполирует смену Showcase→Collection и тянет мини по дуге ~420ms.
@@ -295,13 +310,20 @@ struct BottomBarV2: View {
                         .smooth(duration: offlineShowcaseChromeEntranceAnimationDuration),
                         value: offlineShowcaseBottomChromeEntrance
                     )
+                    .animation(
+                        .smooth(duration: onlineCollectionChromeEntranceAnimationDuration),
+                        value: onlineCollectionBottomChromeEntrance
+                    )
 
-                if activeTab == .collection, !offlineModeState.isEnabled {
+                if activeTab == .collection, !offlineModeState.isEnabled, offlineModeState.collectionTopTabIndex == 1 {
                     ZStack(alignment: .bottom) {
-                        downloadsPullOfflineBlobMist(safeBottom: safeBottom)
-                            .animation(nil, value: offlineModeState.downloadsPullChromeProgress)
+                        OfflinePullGlow(
+                            progress: offlineModeState.downloadsPullChromeProgress,
+                            safeBottom: safeBottom
+                        )
+                        .animation(nil, value: offlineModeState.downloadsPullChromeProgress)
 
-                        Text("Pull to go Offline")
+                        Text("Pull to go offline")
                             .font(.Text2)
                             .foregroundColor(.subtitle)
                             .lineLimit(1)
@@ -314,7 +336,7 @@ struct BottomBarV2: View {
                             .opacity(Double(collectionPullToOfflineHintOpacity))
                             .animation(nil, value: offlineModeState.downloadsPullChromeProgress)
                             .allowsHitTesting(false)
-                            .accessibilityLabel("Pull to go Offline")
+                            .accessibilityLabel("Pull to go offline")
                     }
                     .allowsHitTesting(false)
                 }
@@ -393,48 +415,6 @@ struct BottomBarV2: View {
             .ignoresSafeArea()
         }
         .ignoresSafeArea(edges: .bottom)
-    }
-
-    /// Туманное свечение при оттягивании Downloads: два размытых блоба выезжают снизу к уровню мини-плеера.
-    private func downloadsPullOfflineBlobMist(safeBottom: CGFloat) -> some View {
-        let p = min(1, max(0, offlineModeState.downloadsPullChromeProgress))
-        let mistHeight = Self.downloadsPullBlobMistHeight(safeBottom: safeBottom)
-        /// Сдвиг вниз при p=0 — почти весь слой под нижним краем экрана.
-        let emergenceShift = mistHeight * 0.52
-
-        return GeometryReader { geo in
-            let w = geo.size.width
-            let bleed = Self.downloadsPullBlobBottomBleedDown
-            ZStack(alignment: .bottom) {
-                Ellipse()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                Color(red: 233 / 255, green: 0, blue: 230 / 255).opacity(0.6),
-                                Color(red: 255 / 255, green: 0, blue: 225 / 255).opacity(0.6)
-                            ],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: w * 0.56
-                        )
-                    )
-                    .frame(width: w * 1.12, height: w * 0.84)
-                    .blur(radius: 64)
-                    .offset(x: -w * 0.1, y: mistHeight * 0.02 + bleed)
-
-                Ellipse()
-                    .fill(Color(red: 163 / 255, green: 50 / 255, blue: 1).opacity(0.6))
-                    .frame(width: w * 0.68, height: w * 0.54)
-                    .blur(radius: 54)
-                    .offset(x: w * 0.18, y: mistHeight * 0.01 + bleed * 0.95)
-            }
-            .frame(width: w, height: mistHeight + bleed, alignment: .bottom)
-            .offset(y: (1 - p) * emergenceShift - Self.downloadsPullBlobProgressLift * p)
-            .opacity(Double(p))
-        }
-        .frame(height: mistHeight + Self.downloadsPullBlobBottomBleedDown)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        .allowsHitTesting(false)
     }
 
     private func tabButton(

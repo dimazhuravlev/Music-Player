@@ -7,9 +7,9 @@ struct OfflineShowcase: View {
     var body: some View {
         ShowcaseFeedView(
             albumCarouselTitleOverrides: [
-                "Backup Tracks",
-                "Downloaded Albums",
-                "Downloaded Playlists"
+                "Saved Tracks",
+                "Saved Albums",
+                "Saved Playlists"
             ],
             shaderPlayer: shaderPlayer
         )

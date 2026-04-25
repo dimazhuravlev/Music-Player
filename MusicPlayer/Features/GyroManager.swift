@@ -43,8 +43,9 @@ final class GyroManager: ObservableObject {
 
     private func startDeviceMotion() {
         motion.startDeviceMotionUpdates(using: .xArbitraryZVertical, to: .main) { [weak self] data, _ in
-            guard let self, let attitude = data?.attitude else { return }
+            guard let self, let md = data else { return }
 
+            let attitude = md.attitude
             if self.basePitch == nil { self.basePitch = attitude.pitch }
             if self.baseRoll == nil { self.baseRoll = attitude.roll }
 

@@ -22,8 +22,48 @@ struct BubbleSpec {
 struct BubbleLayout {
     let index: Int
     
-    /// Placeholder asset names when URL is unavailable (images come from network).
-    static let allArtistImageNames: [String] = Array(repeating: "album", count: 32)
+    /// Artist photos in Assets.xcassets (used when `imageURL` is nil).
+    static let allArtistImageNames: [String] = [
+        "1D8A8975e cropped",
+        "Abd El Basset Hamouda",
+        "Angham",
+        "Bashaar Al Jawad",
+        "Bosnian Rainbows",
+        "Bruno Mars",
+        "Fahad Bin Fasla",
+        "Hosam Habib (1)",
+        "Kadim Al Saher",
+        "Main Yandex Disk",
+        "Main from Yandex Disk",
+        "Mouhamed Mounir",
+        "RIDE",
+        "Rahma Riad",
+        "Rashed",
+        "Rgaheb Alama",
+        "Ruby from Yandex Disk",
+        "Sabrina Carpenter Image",
+        "Saif Nabeel",
+        "Siilawy",
+        "Tamer Hosny",
+        "The Jesus and Mary Chain",
+        "Tul8te",
+        "Weeknd Oct 9 2021",
+        "Wegz 1",
+        "Wegz 2",
+        "benson boone",
+        "clairo",
+        "dua lipa",
+        "fugazi",
+        "marwan pablo",
+        "my bloody valentine",
+        "pixies",
+        "saint levant",
+        "saint levant 1",
+        "sons of kemet",
+        "teddy swims",
+        "tul8et",
+        "Wegz 3"
+    ]
     
     /// Compute non-overlapping positions for bubbles, avoiding the title/description area
     func placedBubbles(in containerSize: CGSize, bubbles: [BubbleSpec], textAreaHeightRatio: CGFloat = 0.28) -> [PlacedBubble] {

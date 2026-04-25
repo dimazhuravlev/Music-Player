@@ -1,76 +1,72 @@
 import SwiftUI
 
-/// Мягкое пятно под таббаром Offline: скруглённая «капсула» с градиентом, поворот и сильный blur (по духу макета).
-/// `intensity` 0…1 — синхронизируется с затуханием полноэкранной вспышки.
+/// Свечение под верхним навбаром Offline-витрины. Использует общий `OfflineGlowBackground` (палитра/шейп шторки Offline) —
+/// wobbly main + 3 акцентных wobbly-блоба. Зеркалит `OfflinePullGlow`: блобы выходят за верхний край экрана, силуэт читается под навбаром.
 struct OfflineHeaderGlow: View {
-    var intensity: Double
-
-    /// Макет ~430pt по ширине; координаты и размеры масштабируются от `w`.
-    private let designWidth: CGFloat = 430
-    private let designHeight: CGFloat = 932
-
-    private var accentA: Color { Color(red: 0.64, green: 0.2, blue: 1) }
-    private var accentB: Color { Color(red: 0.82, green: 0.15, blue: 1) }
+    /// Толщина зоны под сейф-эрией (под навбаром), где силуэт ещё виден.
+    private static let topInsetOffline: CGFloat = 60
+    private static let navBarHeight: CGFloat = 56
+    /// Доп. высота сверху — клякса/блобы могут выходить за верхний край (clipsToBounds=false).
+    private static let topBleed: CGFloat = 96
 
     var body: some View {
         GeometryReader { geo in
-            let w = max(geo.size.width, 1)
-            let h = max(geo.size.height, 1)
-            let sx = w / designWidth
-            let sy = h / designHeight
+            let w = geo.size.width
+            let safeTop = geo.safeAreaInsets.top
+            let glowHeight = safeTop + Self.topInsetOffline + Self.navBarHeight
+            let totalH = glowHeight + Self.topBleed
 
-            let blobW = 433.38614 * sx
-            let blobH = 171.52238 * sx
-            let centerX = w / 2
-            let centerY = 6.0314 * sy + geo.safeAreaInsets.top * 0.35 + 30 - 52
-            let cornerR = min(blobW, blobH) / 2
-            // Сильный blur на чёрном почти гасит слой — держим ниже макетных 70, чтобы пятно читалось
-            let blurR = min(120, max(100, 110 * sx))
-
-            ZStack(alignment: .topLeading) {
-                RoundedRectangle(cornerRadius: cornerR, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            stops: [
-                                .init(color: accentA.opacity(0.95 * intensity), location: 0),
-                                .init(color: accentB.opacity(0.82 * intensity), location: 1)
-                            ],
-                            startPoint: UnitPoint(x: 1, y: 0.63),
-                            endPoint: UnitPoint(x: 0, y: 0.37)
-                        )
-                    )
-                    .frame(width: blobW, height: blobH)
-                    .blur(radius: blurR)
-                    .blendMode(.plusLighter)
-                    .position(x: centerX, y: centerY)
-
-                // Второй, более резкий слой — ядро свечения (лёгкий blur)
-                RoundedRectangle(cornerRadius: cornerR, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            stops: [
-                                .init(color: accentA.opacity(0.42 * intensity), location: 0),
-                                .init(color: accentB.opacity(0.28 * intensity), location: 1)
-                            ],
-                            startPoint: UnitPoint(x: 1, y: 0.63),
-                            endPoint: UnitPoint(x: 0, y: 0.37)
-                        )
-                    )
-                    .frame(width: blobW * 0.92, height: blobH * 0.88)
-                    .blur(radius: min(52, 44 * sx))
-                    .blendMode(.plusLighter)
-                    .position(x: centerX, y: centerY)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .allowsHitTesting(false)
+            OfflineGlowBackground(
+                size: CGSize(width: w, height: totalH),
+                isPresented: true,
+                entranceProgress: 1,
+                entranceExtraYFactor: 0,
+                mainBlob: Self.mainBlobConfig(width: w, totalH: totalH),
+                accents: Self.accentsConfig()
+            )
+            .frame(width: w, height: totalH)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .ignoresSafeArea(edges: .top)
+        .allowsHitTesting(false)
+    }
+
+    /// Wobbly клякса по ширине зоны. Центр сильно сдвинут ВВЕРХ — нижний край силуэта читается под навбаром, верх уходит за край экрана.
+    private static func mainBlobConfig(width w: CGFloat, totalH: CGFloat) -> OfflineMainBlobConfig {
+        OfflineMainBlobConfig(
+            width: w * 2,
+            height: totalH * 1.5,
+            blurRadius: 36,
+            offsetY: -totalH * 1.0,
+            rotationPeriodSeconds: 0,
+            opacityBreath: 0.7...0.85,
+            opacityBreathPeriod: 6,
+            phaseSpeed: 0.95,
+            stretchToAspect: true,
+            clipsToBounds: false
+        )
+    }
+
+    /// Акценты компактные, дрейф в верхней зоне (зеркальный к bottom-glow).
+    private static func accentsConfig() -> OfflineAccentBlobsConfig {
+        OfflineAccentBlobsConfig(
+            blob1Size: CGSize(width: 180, height: 150),
+            blob2Size: CGSize(width: 200, height: 170),
+            blob3Size: CGSize(width: 170, height: 130),
+            blurRadius: 50,
+            opacityMax: 0.55,
+            opacityPeriod: 6.5,
+            verticalRangeFactor: -0.85...(-0.42),
+            horizontalMarginFactor: 0.18,
+            horizontalMarginMin: 32,
+            phaseSpeed: 0.7
+        )
     }
 }
 
 #Preview {
     ZStack {
         Color.black
-        OfflineHeaderGlow(intensity: 1)
+        OfflineHeaderGlow()
     }
 }

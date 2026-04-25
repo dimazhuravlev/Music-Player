@@ -2,6 +2,8 @@ import SwiftUI
 
 struct Wizard: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var debugPanelState: DebugPanelState
+    @AppStorage("debug_legacy_bottom_bar") private var useLegacyBottomBar = false
     @State private var currentIndex = 0
     @State private var isPressed = false
     @State private var scrollPosition: Int? = nil
@@ -54,6 +56,10 @@ struct Wizard: View {
                             withAnimation(.smooth(duration: 3.2)) {
                                 dismiss()
                             }
+                        },
+                        onDebugTap: {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            debugPanelState.isPresented = true
                         },
                         scrollOffset: 0
                     )
@@ -184,6 +190,15 @@ struct Wizard: View {
         .transition(.move(edge: .bottom).combined(with: .opacity))
         .zIndex(1)
         .navigationBarHidden(true)
+        .sheet(isPresented: $debugPanelState.isPresented) {
+            DebugMenuSheetContent(useLegacyBottomBar: $useLegacyBottomBar)
+                .presentationDetents([.height(176)])
+                .presentationDragIndicator(.visible)
+                .presentationCornerRadius(24)
+        }
+        .onDisappear {
+            debugPanelState.isPresented = false
+        }
     }
     
     // Animate title transition with opacity
@@ -286,5 +301,6 @@ struct Wizard: View {
 #Preview {
     NavigationStack {
         Wizard()
+            .environmentObject(DebugPanelState())
     }
 }

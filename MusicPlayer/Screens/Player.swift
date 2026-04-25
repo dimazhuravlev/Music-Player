@@ -32,6 +32,7 @@ struct Player: View {
 
     private static var trackCache: [GridIndex: Track] = [:]
     private static let randomSalt: UInt64 = .random(in: 0..<UInt64.max)
+    private static let showSlideBackgroundVariableBlur = true
 
     private let screenW = UIScreen.main.bounds.width
     private let screenH = UIScreen.main.bounds.height
@@ -196,8 +197,8 @@ struct Player: View {
         for track: Track,
         colors: (topHalf: Color, bottomHalf: Color)
     ) -> some View {
-        let topH = screenH * 0.4
-        let bottomH = screenH * 0.6
+        let topH = screenH * 0.5
+        let bottomH = screenH * 0.5
 
         return ZStack {
             VStack(spacing: 0) {
@@ -211,9 +212,12 @@ struct Player: View {
                     .scaleEffect(x: 1, y: -1)
             }
 
-            VariableBlurView(maxBlurRadius: 50, direction: .blurredBottomClearTop, startOffset: 0.32)
+            if Self.showSlideBackgroundVariableBlur {
+                // Маска VariableBlur: конец градиента на y ≈ (1 − startOffset) × высота от верха. При стыке картинок 50/50 — ~0.48…0.52 (раньше 0.32 при 40% сверху).
+                VariableBlurView(maxBlurRadius: 50, direction: .blurredBottomClearTop, startOffset: 0.4)
+            }
 
-            // Gradient: starts at 30% from top (matching variable blur startOffset).
+            // Gradient: нижняя зона (при смене блюра можно подогнать стопы).
             LinearGradient(
                 stops: [
                     .init(color: colors.bottomHalf.opacity(0),    location: 0.00),
@@ -226,6 +230,9 @@ struct Player: View {
             .frame(width: screenW, height: screenH * 0.7)
             .frame(width: screenW, height: screenH, alignment: .bottom)
             .opacity(0.2)
+
+            LowerHazeGrainOverlay(width: screenW, height: screenH)
+                .opacity(LowerHazeGrainLayerOpacity.playerSlide)
         }
         .frame(width: screenW, height: screenH)
         .clipped()

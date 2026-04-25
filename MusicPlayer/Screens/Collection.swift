@@ -49,7 +49,7 @@ struct Collection: View {
     private let edgeOverflow: CGFloat = 120
     private let bottomBarHeight: CGFloat = 140
     /// Дистанция оттягивания (pt), при которой `downloadsPullChromeProgress` = 1.
-    private let downloadsPullChromeThreshold: CGFloat = 108
+    private let downloadsPullChromeThreshold: CGFloat = 88
     /// Синхронно с `BottomBarV2.miniChromeProgressBoost`: мини в офлайн-низу при `progress * boost ≥ 1`.
     private static let downloadsMiniChromeBoost: CGFloat = 1.18
     private static var downloadsPullProgressWhenMiniAtOfflineBottom: CGFloat { 1 / downloadsMiniChromeBoost }
@@ -76,12 +76,17 @@ struct Collection: View {
         #if os(iOS)
         .navigationBarHidden(true)
         #endif
-        .onAppear { applyPreferredCollectionTopTab() }
+        .onAppear {
+            applyPreferredCollectionTopTab()
+            offlineModeState.collectionTopTabIndex = selectedTopTab
+        }
         .onChange(of: offlineModeState.preferredCollectionTopTab) { _, _ in
             applyPreferredCollectionTopTab()
+            offlineModeState.collectionTopTabIndex = selectedTopTab
         }
-        .onChange(of: selectedTopTab) { _, _ in
+        .onChange(of: selectedTopTab) { _, newValue in
             resetDownloadsPullScrollState()
+            offlineModeState.collectionTopTabIndex = newValue
         }
     }
     
@@ -173,7 +178,7 @@ struct Collection: View {
                 .accessibilityHidden(true)
                 #endif
                 VStack(alignment: .leading, spacing: 24) {
-                    offlineModeBanner
+                    OfflineWidget(isEnabled: $offlineModeState.isEnabled)
                         .padding(.top, 18)
                         .padding(.bottom, 10)
                         .padding(.horizontal, max(4, downloadsHorizontalPadding - 2))
@@ -263,26 +268,6 @@ struct Collection: View {
         }
     }
 
-    private var offlineModeBanner: some View {
-        HStack(alignment: .center, spacing: 16) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Offline Mode")
-                    .font(.Headline5)
-                    .foregroundStyle(Color.fill1)
-                Text("Save data, play downloaded music")
-                    .font(.Text2)
-                    .foregroundStyle(Color.offlineBannerSubtitle)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            
-            Toggle("", isOn: $offlineModeState.isEnabled)
-                .labelsHidden()
-                .tint(Color.accent)
-        }
-        .padding(20)
-        .offlineModeBannerGlow()
-    }
 }
 
 #if os(iOS)

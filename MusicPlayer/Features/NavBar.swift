@@ -39,6 +39,7 @@ struct NavBar: View {
     let showBackground: Bool
     let onSearchTap: (() -> Void)?
     let onSkipTap: (() -> Void)?
+    let onDebugTap: (() -> Void)?
     let contentName: String?
     let contentImageName: String?
     var contentImageURL: URL? = nil
@@ -51,6 +52,7 @@ struct NavBar: View {
         showBackground: Bool = true,
         onSearchTap: (() -> Void)? = nil,
         onSkipTap: (() -> Void)? = nil,
+        onDebugTap: (() -> Void)? = nil,
         contentName: String? = nil,
         contentImageName: String? = nil,
         contentImageURL: URL? = nil,
@@ -62,6 +64,7 @@ struct NavBar: View {
         self.showBackground = showBackground
         self.onSearchTap = onSearchTap
         self.onSkipTap = onSkipTap
+        self.onDebugTap = onDebugTap
         self.contentName = contentName
         self.contentImageName = contentImageName
         self.contentImageURL = contentImageURL
@@ -104,7 +107,12 @@ struct NavBar: View {
             if showSearchButton {
                 SearchButton(onTap: onSearchTap)
             } else if showSkipButton {
-                SkipButton(onTap: onSkipTap)
+                HStack(spacing: 8) {
+                    if let onDebugTap {
+                        SkipButton(title: "Debug", onTap: onDebugTap)
+                    }
+                    SkipButton(onTap: onSkipTap)
+                }
             }
         }
         .padding(.horizontal, 12)
@@ -191,15 +199,17 @@ struct SearchButton: View {
 }
 
 struct SkipButton: View {
+    let title: String
     let onTap: (() -> Void)?
     
-    init(onTap: (() -> Void)? = nil) {
+    init(title: String = "Skip", onTap: (() -> Void)? = nil) {
+        self.title = title
         self.onTap = onTap
     }
     
     var body: some View {
         Button(action: { onTap?() }) {
-            Text("Skip")
+            Text(title)
                 .font(.Text1)
                 .foregroundColor(.fill1)
                 .padding(.horizontal, 16)

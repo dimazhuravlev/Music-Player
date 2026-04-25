@@ -4,6 +4,7 @@ import VariableBlur
 struct BottomBar: View {
     @EnvironmentObject private var nowPlayingState: NowPlayingState
     @EnvironmentObject private var collectionState: CollectionState
+    @EnvironmentObject private var offlineModeState: OfflineModeState
     @State private var isCardsPressed = false
     @State private var isShowcasePressed = false
     @Binding var activeTab: AppTab
@@ -20,7 +21,10 @@ struct BottomBar: View {
     }
     
     var body: some View {
-        VStack {
+        GeometryReader { geo in
+            let safeBottom = geo.safeAreaInsets.bottom
+            ZStack(alignment: .bottom) {
+                VStack {
             Spacer()
             
             HStack {
@@ -45,13 +49,9 @@ struct BottomBar: View {
                 .frame(width: tabContainerSize, height: tabContainerSize, alignment: .center)
                 Spacer()
                 
-                // Showcase icon in the middle
-                Image("showcase")
-                    .renderingMode(.template)
-                    .resizable()
-                    .scaledToFit()
-                    .foregroundColor(.fill1)
-                    .frame(width: 48, height: 48)
+                // Showcase icon in the middle — animated Metal glow shader
+                ShaderButtonView()
+                    .frame(width: 80, height: 80)
                     .scaleEffect(isShowcasePressed ? 0.92 : 1.0)
                     .animation(.smooth(duration: 0.15), value: isShowcasePressed)
                     .onTapGesture {
@@ -111,6 +111,17 @@ struct BottomBar: View {
             }
             .padding(.horizontal, 48)
             .padding(.bottom, 40)
+                }
+
+                if activeTab == .collection, !offlineModeState.isEnabled, offlineModeState.collectionTopTabIndex == 1 {
+                    OfflinePullGlow(
+                        progress: offlineModeState.downloadsPullChromeProgress,
+                        safeBottom: safeBottom
+                    )
+                    .animation(nil, value: offlineModeState.downloadsPullChromeProgress)
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
         }
         .background(alignment: .bottom) {
             if activeTab != .player {
@@ -165,6 +176,7 @@ struct BottomBar: View {
         BottomBar()
             .environmentObject(NowPlayingState())
             .environmentObject(CollectionState())
+            .environmentObject(OfflineModeState())
     }
 }
 

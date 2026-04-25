@@ -110,28 +110,33 @@ private extension GenreCard {
     }
     
     var artistImageNames: [String] {
-        // Use artist image names from BubbleLayout
-        let all = BubbleLayout.allArtistImageNames
-        
-        // Use deterministic random selection based on card index
+        let pool = BubbleLayout.allArtistImageNames
+        guard !pool.isEmpty else { return [] }
+
         var result: [String] = []
-        guard !all.isEmpty else { return result }
-        
-        // Create a seeded random number generator for this card
+        if genreDefinition.genre != "Artist Selection" {
+            for artist in genreDefinition.artists {
+                if let asset = Self.resolvedAssetName(forArtist: artist, artistPool: pool),
+                   !result.contains(asset) {
+                    result.append(asset)
+                }
+                if result.count >= 10 { break }
+            }
+        }
+
         var rng = SeededGenerator(seed: UInt64(index * 1315423911 + 0xD1E5C0DE))
-        
-        // Shuffle the array deterministically for this card
-        var shuffled = all
-        for i in stride(from: shuffled.count - 1, to: 0, by: -1) {
+        var rest = pool.filter { !result.contains($0) }
+        for i in stride(from: rest.count - 1, to: 0, by: -1) {
             let j = Int.random(in: 0...i, using: &rng)
-            shuffled.swapAt(i, j)
+            rest.swapAt(i, j)
         }
-        
-        // Take first 10 unique artists
-        for i in 0..<min(10, shuffled.count) {
-            result.append(shuffled[i])
+        for asset in rest where result.count < 10 {
+            result.append(asset)
         }
-        
+
+        while result.count < 10 {
+            result.append(pool[result.count % pool.count])
+        }
         return result
     }
     
@@ -196,5 +201,39 @@ private extension GenreCard {
                 )
             }
         }
+    }
+
+    /// Album (or other) bundled images keyed by normalized artist name from `GenreCatalog`.
+    private static let wizardArtistOverrideAssets: [String: String] = [
+        "atthedrivein": "relationshipofcommand",
+        "joydivision": "closer-joy-division",
+        "mybloodyvalentine": "loveless",
+        "radiohead": "in rainbows",
+        "thesmiths": "the-queen-is-dead",
+        "blur": "blur",
+        "blackflag": "mywar",
+        "minorthreat": "minor-threat",
+        "ritesofspring": "rites-of-spring",
+        "themarsvolta": "amputechture",
+        "boardsofcanada": "boardsofcanada",
+        "cocteautwins": "garlands",
+    ]
+
+    private static func normalizedAssetKey(_ name: String) -> String {
+        name.lowercased().unicodeScalars
+            .filter { CharacterSet.alphanumerics.contains($0) }
+            .map { String($0) }
+            .joined()
+    }
+
+    private static func matchingArtistAsset(for artist: String, in pool: [String]) -> String? {
+        let key = normalizedAssetKey(artist)
+        return pool.first { normalizedAssetKey($0) == key }
+    }
+
+    private static func resolvedAssetName(forArtist artist: String, artistPool: [String]) -> String? {
+        if let match = matchingArtistAsset(for: artist, in: artistPool) { return match }
+        let key = normalizedAssetKey(artist)
+        return wizardArtistOverrideAssets[key]
     }
 }
